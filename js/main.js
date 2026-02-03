@@ -1,4 +1,18 @@
 const STORAGE_KEY = 'academia_treino';
+
+// Mapa de imagens dos exercícios
+const exerciseImages = {
+    'Supino Reto Máquina': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200&h=240&fit=crop',
+    'Supino Inclinado com Halteres': 'https://images.unsplash.com/photo-1587280591945-5e343bbbd32e?w=200&h=240&fit=crop',
+    'Crucifixo na Polia Média': 'https://images.unsplash.com/photo-1581009146989-51e4b8b62149?w=200&h=240&fit=crop',
+    'Desenvolvimento Máquina (Pegada Neutra)': 'https://images.unsplash.com/photo-1599058917212-d217cde29513?w=200&h=240&fit=crop',
+    'Tríceps Francês na Polia com Corda': 'https://images.unsplash.com/photo-1581472723943-487a5cea902f?w=200&h=240&fit=crop',
+    'Puxada Frontal': 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=200&h=240&fit=crop',
+    'Rosca Direta': 'https://images.unsplash.com/photo-1574955957338-cbf3b2b6265f?w=200&h=240&fit=crop',
+    'Agachamento': 'https://images.unsplash.com/photo-1574287851041-d80bf19a6222?w=200&h=240&fit=crop',
+    'Leg Press': 'https://images.unsplash.com/photo-1598971457318-b3d1e678e292?w=200&h=240&fit=crop'
+};
+
 const DEMO_DATA = {
     push: [
         {
@@ -8,7 +22,7 @@ const DEMO_DATA = {
             load: '10-15',
             interval: '50s',
             instructions: '+3 séries normais (10-12 repetições), na última série + drop set, Reduz 30% da carga + continua até a falha, Reduz mais 30% + continua até a falha',
-            image: 'https://via.placeholder.com/120x140?text=Supino',
+            image: exerciseImages['Supino Reto Máquina'],
             completed: false
         },
         {
@@ -18,7 +32,7 @@ const DEMO_DATA = {
             load: '10-15',
             interval: '50s',
             instructions: '+3 blocos: 1ª vez: 10 repetições (mesma carga), 2ª vez: 10 repetições (com carga maior, cerca de +20%), 3ª vez: 6 repetições (com carga maior, cerca de +20%)',
-            image: 'https://via.placeholder.com/120x140?text=Supino+Inclinado',
+            image: exerciseImages['Supino Inclinado com Halteres'],
             completed: false
         },
         {
@@ -28,7 +42,7 @@ const DEMO_DATA = {
             load: '25kg',
             interval: '50s',
             instructions: '1 série só, com 20-25 repetições contínuas, carga leve-moderada, foco em alongar e contrair bem o peitoral.',
-            image: 'https://via.placeholder.com/120x140?text=Crucifixo',
+            image: exerciseImages['Crucifixo na Polia Média'],
             completed: false
         },
         {
@@ -38,7 +52,7 @@ const DEMO_DATA = {
             load: '25kg',
             interval: '50s',
             instructions: 'Suba os halteres acima da cabeça com controle.',
-            image: 'https://via.placeholder.com/120x140?text=Desenvolvimento',
+            image: exerciseImages['Desenvolvimento Máquina (Pegada Neutra)'],
             completed: false
         },
         {
@@ -48,7 +62,7 @@ const DEMO_DATA = {
             load: '25kg',
             interval: '50s',
             instructions: 'Cotovelos fixos. Estenda completamente os braços no final.',
-            image: 'https://via.placeholder.com/120x140?text=Triceps',
+            image: exerciseImages['Tríceps Francês na Polia com Corda'],
             completed: false
         }
     ],
@@ -60,7 +74,7 @@ const DEMO_DATA = {
             load: '50kg',
             interval: '60s',
             instructions: 'Puxe até o peito. Mantenha o peito erguido e puxe com a escápula.',
-            image: 'https://via.placeholder.com/120x140?text=Puxada',
+            image: exerciseImages['Puxada Frontal'],
             completed: false
         },
         {
@@ -70,7 +84,7 @@ const DEMO_DATA = {
             load: '15kg',
             interval: '60s',
             instructions: 'Cotovelos fixos na lateral. Movimento só do antebraço.',
-            image: 'https://via.placeholder.com/120x140?text=Rosca',
+            image: exerciseImages['Rosca Direta'],
             completed: false
         }
     ],
@@ -82,7 +96,7 @@ const DEMO_DATA = {
             load: '80kg',
             interval: '90s',
             instructions: 'Joelhos acompanham a direção dos pés. Peito para cima durante todo o movimento.',
-            image: 'https://via.placeholder.com/120x140?text=Agachamento',
+            image: exerciseImages['Agachamento'],
             completed: false
         },
         {
@@ -92,7 +106,7 @@ const DEMO_DATA = {
             load: '120kg',
             interval: '60s',
             instructions: 'Pés ligeiramente afastados. Não tranque os joelhos na extensão total.',
-            image: 'https://via.placeholder.com/120x140?text=Leg+Press',
+            image: exerciseImages['Leg Press'],
             completed: false
         }
     ]
