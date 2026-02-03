@@ -2,15 +2,15 @@ const STORAGE_KEY = 'academia_treino';
 
 // Mapa de imagens dos exercícios
 const exerciseImages = {
-    'Supino Reto Máquina': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200&h=240&fit=crop',
-    'Supino Inclinado com Halteres': 'https://images.unsplash.com/photo-1587280591945-5e343bbbd32e?w=200&h=240&fit=crop',
-    'Crucifixo na Polia Média': 'https://images.unsplash.com/photo-1581009146989-51e4b8b62149?w=200&h=240&fit=crop',
-    'Desenvolvimento Máquina (Pegada Neutra)': 'https://images.unsplash.com/photo-1599058917212-d217cde29513?w=200&h=240&fit=crop',
-    'Tríceps Francês na Polia com Corda': 'https://images.unsplash.com/photo-1581472723943-487a5cea902f?w=200&h=240&fit=crop',
-    'Puxada Frontal': 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=200&h=240&fit=crop',
-    'Rosca Direta': 'https://images.unsplash.com/photo-1574955957338-cbf3b2b6265f?w=200&h=240&fit=crop',
-    'Agachamento': 'https://images.unsplash.com/photo-1574287851041-d80bf19a6222?w=200&h=240&fit=crop',
-    'Leg Press': 'https://images.unsplash.com/photo-1598971457318-b3d1e678e292?w=200&h=240&fit=crop'
+    'Supino Reto Máquina': 'https://www.wikihow.com/images/thumb/9/98/Do-a-Bench-Press-Step-7-Version-2.jpg/v4-460px-Do-a-Bench-Press-Step-7-Version-2.jpg.webp',
+    'Supino Inclinado com Halteres': 'https://www.wikihow.com/images/thumb/b/b1/Incline-Dumbbell-Press-Step-1-Version-2.jpg/v4-460px-Incline-Dumbbell-Press-Step-1-Version-2.jpg.webp',
+    'Crucifixo na Polia Média': 'https://www.wikihow.com/images/thumb/f/f1/Do-a-Cable-Flyer-Step-2.jpg/v4-460px-Do-a-Cable-Flyer-Step-2.jpg.webp',
+    'Desenvolvimento Máquina (Pegada Neutra)': 'https://www.wikihow.com/images/thumb/a/ad/Do-Shoulder-Press-Step-2-Version-2.jpg/v4-460px-Do-Shoulder-Press-Step-2-Version-2.jpg.webp',
+    'Tríceps Francês na Polia com Corda': 'https://www.wikihow.com/images/thumb/e/ed/Do-Tricep-Dips-Step-7-Version-2.jpg/v4-460px-Do-Tricep-Dips-Step-7-Version-2.jpg.webp',
+    'Puxada Frontal': 'https://www.wikihow.com/images/thumb/2/2d/Do-Pull-Ups-Step-2-Version-2.jpg/v4-460px-Do-Pull-Ups-Step-2-Version-2.jpg.webp',
+    'Rosca Direta': 'https://www.wikihow.com/images/thumb/d/d4/Do-Dumbbell-Curls-Step-2-Version-2.jpg/v4-460px-Do-Dumbbell-Curls-Step-2-Version-2.jpg.webp',
+    'Agachamento': 'https://www.wikihow.com/images/thumb/c/ce/Do-a-Squat-Step-4-Version-2.jpg/v4-460px-Do-a-Squat-Step-4-Version-2.jpg.webp',
+    'Leg Press': 'https://www.wikihow.com/images/thumb/7/73/Use-a-Leg-Press-Machine-Step-4.jpg/v4-460px-Use-a-Leg-Press-Machine-Step-4.jpg.webp'
 };
 
 const DEMO_DATA = {
