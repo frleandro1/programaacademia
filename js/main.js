@@ -113,6 +113,8 @@ const DEMO_DATA = {
 };
 
 function init() {
+    // Limpar localStorage para forçar reload com novos dados
+    localStorage.removeItem(STORAGE_KEY);
     initializeDemoData();
     loadTraining();
 }
