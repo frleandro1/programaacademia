@@ -1,16 +1,16 @@
 const STORAGE_KEY = 'academia_treino';
 
-// Mapa de imagens dos exercícios
+// Mapa de imagens dos exercícios (caminho local)
 const exerciseImages = {
-    'Supino Reto Máquina': 'https://www.wikihow.com/images/thumb/9/98/Do-a-Bench-Press-Step-7-Version-2.jpg/v4-460px-Do-a-Bench-Press-Step-7-Version-2.jpg.webp',
-    'Supino Inclinado com Halteres': 'https://www.wikihow.com/images/thumb/b/b1/Incline-Dumbbell-Press-Step-1-Version-2.jpg/v4-460px-Incline-Dumbbell-Press-Step-1-Version-2.jpg.webp',
-    'Crucifixo na Polia Média': 'https://www.wikihow.com/images/thumb/f/f1/Do-a-Cable-Flyer-Step-2.jpg/v4-460px-Do-a-Cable-Flyer-Step-2.jpg.webp',
-    'Desenvolvimento Máquina (Pegada Neutra)': 'https://www.wikihow.com/images/thumb/a/ad/Do-Shoulder-Press-Step-2-Version-2.jpg/v4-460px-Do-Shoulder-Press-Step-2-Version-2.jpg.webp',
-    'Tríceps Francês na Polia com Corda': 'https://www.wikihow.com/images/thumb/e/ed/Do-Tricep-Dips-Step-7-Version-2.jpg/v4-460px-Do-Tricep-Dips-Step-7-Version-2.jpg.webp',
-    'Puxada Frontal': 'https://www.wikihow.com/images/thumb/2/2d/Do-Pull-Ups-Step-2-Version-2.jpg/v4-460px-Do-Pull-Ups-Step-2-Version-2.jpg.webp',
-    'Rosca Direta': 'https://www.wikihow.com/images/thumb/d/d4/Do-Dumbbell-Curls-Step-2-Version-2.jpg/v4-460px-Do-Dumbbell-Curls-Step-2-Version-2.jpg.webp',
-    'Agachamento': 'https://www.wikihow.com/images/thumb/c/ce/Do-a-Squat-Step-4-Version-2.jpg/v4-460px-Do-a-Squat-Step-4-Version-2.jpg.webp',
-    'Leg Press': 'https://www.wikihow.com/images/thumb/7/73/Use-a-Leg-Press-Machine-Step-4.jpg/v4-460px-Use-a-Leg-Press-Machine-Step-4.jpg.webp'
+    'Supino Reto Máquina': 'images/supino-reto.jpg',
+    'Supino Inclinado com Halteres': 'images/supino-inclinado.jpg',
+    'Crucifixo na Polia Média': 'images/crucifixo-polia.jpg',
+    'Desenvolvimento Máquina (Pegada Neutra)': 'images/desenvolvimento-maquina.jpg',
+    'Tríceps Francês na Polia com Corda': 'images/triceps-frances.jpg',
+    'Puxada Frontal': 'images/puxada-frontal.jpg',
+    'Rosca Direta': 'images/rosca-direta.jpg',
+    'Agachamento': 'images/agachamento.jpg',
+    'Leg Press': 'images/leg-press.jpg'
 };
 
 const DEMO_DATA = {
