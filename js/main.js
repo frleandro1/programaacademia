@@ -23,6 +23,7 @@ const DEMO_DATA = {
             interval: '50s',
             instructions: '+3 séries normais (10-12 repetições), na última série + drop set, Reduz 30% da carga + continua até a falha, Reduz mais 30% + continua até a falha',
             image: exerciseImages['Supino Reto Máquina'],
+            videoUrl: 'https://www.youtube.com/shorts/UHa9U-O09_U',
             completed: false
         },
         {
@@ -178,7 +179,7 @@ function loadTraining() {
                             </div>
                             ${ex.instructions ? `<div class="exercise-instructions">${escapeHtml(ex.instructions)}</div>` : ''}
                             <div class="action-buttons">
-                                <button class="btn-video" onclick="window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent('${escapeHtml(ex.name)}'), '_blank')">📹 Ver Vídeo</button>
+                                <button class="btn-video" onclick="window.open('${ex.videoUrl ? ex.videoUrl : 'https://www.youtube.com/results?search_query=' + encodeURIComponent('${escapeHtml(ex.name)}')}', '_blank')">📹 Ver Vídeo</button>
                             </div>
                         </div>
                         <div class="exercise-image">${imageHtml}</div>
