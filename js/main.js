@@ -2,15 +2,15 @@ const STORAGE_KEY = 'academia_treino';
 
 // Mapa de imagens dos exercícios (caminho local)
 const exerciseImages = {
-    'Supino Reto Máquina': 'images/supino-reto.jpg',
-    'Supino Inclinado com Halteres': 'images/supino-inclinado.jpg',
-    'Crucifixo na Polia Média': 'images/crucifixo-polia.jpg',
-    'Desenvolvimento Máquina (Pegada Neutra)': 'images/desenvolvimento-maquina.jpg',
-    'Tríceps Francês na Polia com Corda': 'images/triceps-frances.jpg',
-    'Puxada Frontal': 'images/puxada-frontal.jpg',
-    'Rosca Direta': 'images/rosca-direta.jpg',
-    'Agachamento': 'images/agachamento.jpg',
-    'Leg Press': 'images/leg-press.jpg'
+    'Supino Reto Máquina': 'images/supino-reto.svg',
+    'Supino Inclinado com Halteres': 'images/supino-inclinado.svg',
+    'Crucifixo na Polia Média': 'images/crucifixo-polia.svg',
+    'Desenvolvimento Máquina (Pegada Neutra)': 'images/desenvolvimento-maquina.svg',
+    'Tríceps Francês na Polia com Corda': 'images/triceps-frances.svg',
+    'Puxada Frontal': 'images/puxada-frontal.svg',
+    'Rosca Direta': 'images/rosca-direta.svg',
+    'Agachamento': 'images/agachamento.svg',
+    'Leg Press': 'images/leg-press.svg'
 };
 
 const DEMO_DATA = {
