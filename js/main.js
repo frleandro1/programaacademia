@@ -227,21 +227,30 @@ const AVAILABLE_VIDEOS = [
 
 // Função para encontrar o vídeo correspondente ao exercício
 function findVideoForExercise(exerciseName) {
-    if (!exerciseName) return null;
+    if (!exerciseName) {
+        console.warn('⚠️ Nome do exercício vazio');
+        return null;
+    }
     
     const nameNormalized = exerciseName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    console.log(`🎬 Procurando vídeo para: "${exerciseName}" (normalizado: "${nameNormalized}")`);
     
     for (const video of AVAILABLE_VIDEOS) {
         const videoNormalized = video.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         
-        // Verifica se o nome do exercício está contido no nome do vídeo
+        // Verifica se o nome do exercício está contido no nome do vídeo ou vice-versa
         if (videoNormalized.includes(nameNormalized) || nameNormalized.includes(videoNormalized)) {
-            return `./videos/${video}`;
+            const fullPath = `./videos/${video}`;
+            console.log(`✅ Encontrado vídeo: ${video}`);
+            return fullPath;
         }
     }
     
+    console.warn(`❌ Nenhum vídeo encontrado para: "${exerciseName}"`);
+    console.log('📝 Vídeos disponíveis:', AVAILABLE_VIDEOS);
     return null;
 }
+
 
 // Função para extrair ID do YouTube e gerar URL da miniatura
 function getYoutubeThumb(url) {
@@ -535,17 +544,19 @@ function renderizarTreino(exercises) {
                     imageHtml = `
                         <video width="100%" height="100%" style="border-radius: 8px; object-fit: cover;" 
                                controls preload="metadata" 
+                               onerror="console.error('Erro ao carregar vídeo: ${thumbUrl}')"
                                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%231a1a1a'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='30'%3E▶%3C/text%3E%3C/svg%3E">
                             <source src="${thumbUrl}" type="video/mp4">
-                            💪
+                            Seu navegador não suporta vídeo HTML5.
                         </video>
                     `;
                 } else if (thumbUrl) {
                     // Para YouTube, usa imagem com loading lazy
-                    imageHtml = `<img src="${thumbUrl}" alt="${ex.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    imageHtml = `<img src="${thumbUrl}" alt="${ex.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" onerror="console.error('Erro ao carregar imagem: ${thumbUrl}')">`;
                 } else {
-                    // Fallback
-                    imageHtml = `<div class="no-image">💪</div>`;
+                    // Fallback quando não encontra vídeo
+                    console.warn(`⚠️ Sem vídeo para: ${ex.name}`);
+                    imageHtml = `<div class="no-image" title="Vídeo não disponível">💪</div>`;
                 }
 
                 html += `
