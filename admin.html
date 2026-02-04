@@ -359,23 +359,30 @@
         }
     </style>
 
-    <!-- Firebase Scripts - Carregados diretamente -->
-    <script async src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script async src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
+    <!-- Firebase Scripts - Versão Compat (mais confiável) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
     <!-- Script inline para aguardar Firebase -->
     <script>
         // Flag para Firebase
         let firebaseScriptsLoaded = false;
+        let firebaseLoadAttempts = 0;
         
         // Aguardar Firebase estar disponível
         const waitForFirebase = setInterval(() => {
-            if (typeof firebase !== 'undefined' && firebase.database) {
-                console.log('✅ Firebase scripts carregados!');
+            firebaseLoadAttempts++;
+            console.log(`🔍 Tentativa ${firebaseLoadAttempts}: firebase = ${typeof firebase}, firebase.database = ${typeof firebase?.database}`);
+            
+            if (typeof firebase !== 'undefined' && typeof firebase.database === 'function') {
+                console.log('✅ Firebase scripts carregados com sucesso!');
                 firebaseScriptsLoaded = true;
                 clearInterval(waitForFirebase);
+            } else if (firebaseLoadAttempts > 50) {
+                console.error('❌ Timeout ao aguardar Firebase');
+                clearInterval(waitForFirebase);
             }
-        }, 100);
+        }, 200);
     </script>
 </head>
 <body>
@@ -590,12 +597,13 @@
         function initializeFirebaseAdmin() {
             try {
                 console.log('🔄 Inicializando Firebase...');
-                console.log('firebase disponível?', typeof firebase !== 'undefined');
-                console.log('firebaseScriptsLoaded?', firebaseScriptsLoaded);
+                console.log('typeof firebase:', typeof firebase);
+                console.log('firebaseScriptsLoaded:', firebaseScriptsLoaded);
+                console.log('firebase.database:', typeof firebase?.database);
                 
-                if (typeof firebase === 'undefined' || !firebaseScriptsLoaded) {
-                    console.warn('⚠️ Firebase SDK ainda não carregou. Aguardando...');
-                    setTimeout(initializeFirebaseAdmin, 500);
+                if (typeof firebase === 'undefined' || !firebaseScriptsLoaded || typeof firebase.database !== 'function') {
+                    console.warn('⚠️ Firebase SDK ainda não carregou. Aguardando... (tentativa contínua)');
+                    setTimeout(initializeFirebaseAdmin, 1000);
                     return;
                 }
 
@@ -613,16 +621,18 @@
                 // Evitar reinicializar se já foi inicializado
                 if (firebase.apps.length === 0) {
                     firebase.initializeApp(firebaseConfig);
-                    console.log('✅ Firebase app inicializado');
+                    console.log('✅ Firebase app inicializado com sucesso!');
                 }
                 
                 db = firebase.database();
                 firebaseReady = true;
-                console.log('✅ Firebase Database inicializado com sucesso!');
-                console.log('🔥 URL:', firebaseConfig.databaseURL);
+                console.log('✅✅✅ FIREBASE ESTÁ PRONTO! ✅✅✅');
+                console.log('🔥 Database URL:', firebaseConfig.databaseURL);
+                console.log('📊 db =', db);
             } catch (error) {
                 console.error('❌ Erro ao inicializar Firebase:', error.message);
-                setTimeout(initializeFirebaseAdmin, 1000);
+                console.error('Stack:', error.stack);
+                setTimeout(initializeFirebaseAdmin, 2000);
             }
         }
 
