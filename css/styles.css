@@ -421,6 +421,29 @@ body {
     transform: translateY(0);
 }
 
+.dashboard-actions .btn-change-treino {
+    background: #2c5aa0;
+    color: white;
+    padding: 8px 16px;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dashboard-actions .btn-change-treino:hover {
+    background: #1a3a52;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.dashboard-actions .btn-change-treino:active {
+    transform: translateY(0);
+}
+
 .btn-video {
     background: #2c5aa0;
     color: white;
