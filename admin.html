@@ -557,30 +557,32 @@
 
         // Exercícios de demo - COMPLETA BIBLIOTECA COM 19 EXERCÍCIOS
         const DEMO_EXERCISES = {
-            // PUSH (10 exercícios)
-            1: { name: 'Supino reto barra', grupo: 'push', series: '3x12 drop set', load: '80kg', interval: '50s', instructions: 'Drop set na última série', id: 1 },
-            2: { name: 'Supino inclinado 30 halteres', grupo: 'push', series: '3x10/10/6', load: '20kg', interval: '50s', instructions: 'Progressivo em carga', id: 2 },
-            3: { name: 'Crucifixo Fly ou PecDeck máquina', grupo: 'push', series: '3x12', load: '40kg', interval: '45s', instructions: 'Movimento controlado', id: 3 },
-            4: { name: 'Crucifixo polia alta', grupo: 'push', series: '1x25', load: '25kg', interval: '50s', instructions: 'Série única com bastante volume', id: 4 },
-            5: { name: 'Desenvolvimento máquina', grupo: 'push', series: '4x12', load: '60kg', interval: '50s', instructions: 'Cotovelos nunca trancam', id: 5 },
-            6: { name: 'Tríceps francês barra polia baixa', grupo: 'push', series: '4x12', load: '40kg', interval: '50s', instructions: 'Cotovelos fixos, estenda completamente', id: 6 },
-            7: { name: 'Tríceps francês corda polia baixa', grupo: 'push', series: '3x12-15', load: '35kg', interval: '45s', instructions: 'Puxe a corda em direção às coxas', id: 7 },
-            8: { name: 'Pulley tríceps barra reta', grupo: 'push', series: '3x12-15', load: '30kg', interval: '45s', instructions: 'Palmas para baixo, cotovelos fixos', id: 8 },
-            9: { name: 'Pulley tríceps supinado', grupo: 'push', series: '3x12-15', load: '25kg', interval: '45s', instructions: 'Palmas para cima, movimento controlado', id: 9 },
-            10: { name: 'Tríceps pulley corda', grupo: 'push', series: '3x12-15', load: '35kg', interval: '45s', instructions: 'Afaste a corda no final do movimento', id: 10 },
+            // TREINO A (Push pesado)
+            1: { name: 'Supino reto barra', grupo: 'A', series: '3x12 drop set', load: '80kg', interval: '50s', instructions: 'Drop set na última série', id: 1 },
+            2: { name: 'Supino inclinado 30 halteres', grupo: 'A', series: '3x10/10/6', load: '20kg', interval: '50s', instructions: 'Progressivo em carga', id: 2 },
+            3: { name: 'Crucifixo Fly ou PecDeck máquina', grupo: 'A', series: '3x12', load: '40kg', interval: '45s', instructions: 'Movimento controlado', id: 3 },
+            5: { name: 'Desenvolvimento máquina', grupo: 'A', series: '4x12', load: '60kg', interval: '50s', instructions: 'Cotovelos nunca trancam', id: 5 },
+            6: { name: 'Tríceps francês barra polia baixa', grupo: 'A', series: '4x12', load: '40kg', interval: '50s', instructions: 'Cotovelos fixos, estenda completamente', id: 6 },
             
-            // PULL (6 exercícios)
-            11: { name: 'Puxada frontal aberta', grupo: 'pull', series: '4x8-10', load: '80kg', interval: '60s', instructions: 'Puxe até o peito, puxe com escápula', id: 11 },
-            12: { name: 'Puxada frontal aberta (variação)', grupo: 'pull', series: '4x8-10', load: '75kg', interval: '60s', instructions: 'Pegada mais fechada, puxe até queixo', id: 12 },
-            13: { name: 'Remada sentada máquina', grupo: 'pull', series: '4x10-12', load: '90kg', interval: '60s', instructions: 'Costas eretas, puxe para abdômen', id: 13 },
-            14: { name: 'Rosca em Pé Halteres', grupo: 'pull', series: '3x8-10', load: '18kg', interval: '60s', instructions: 'Cotovelos fixos, sem balançar corpo', id: 14 },
-            15: { name: 'Rosca Bíceps Halteres', grupo: 'pull', series: '3x8-10', load: '18kg', interval: '60s', instructions: 'Movimento alternado ou simultâneo', id: 15 },
-            16: { name: 'Rosca Direta em Pé Polia baixa', grupo: 'pull', series: '3x10-12', load: '35kg', interval: '50s', instructions: 'Cotovelos fixos, movimento controlado', id: 16 },
+            // TREINO B (Pull pesado)
+            11: { name: 'Puxada frontal aberta', grupo: 'B', series: '4x8-10', load: '80kg', interval: '60s', instructions: 'Puxe até o peito, puxe com escápula', id: 11 },
+            13: { name: 'Remada sentada máquina', grupo: 'B', series: '4x10-12', load: '90kg', interval: '60s', instructions: 'Costas eretas, puxe para abdômen', id: 13 },
+            14: { name: 'Rosca em Pé Halteres', grupo: 'B', series: '3x8-10', load: '18kg', interval: '60s', instructions: 'Cotovelos fixos, sem balançar corpo', id: 14 },
+            15: { name: 'Rosca Bíceps Halteres', grupo: 'B', series: '3x8-10', load: '18kg', interval: '60s', instructions: 'Movimento alternado ou simultâneo', id: 15 },
             
-            // LEGS (3 exercícios)
-            17: { name: 'Agachamento Livre', grupo: 'legs', series: '4x8-10', load: '120kg', interval: '90s', instructions: 'Profundidade até paralelo, peito para cima', id: 17 },
-            18: { name: 'Legpress Horizontal', grupo: 'legs', series: '4x8-10', load: '280kg', interval: '60s', instructions: 'Pés afastados, não tranque joelhos', id: 18 },
-            19: { name: 'Cadeira Adutora', grupo: 'legs', series: '3x12-15', load: '80kg', interval: '45s', instructions: 'Aduto as coxas completamente', id: 19 }
+            // TREINO C (Push moderado)
+            4: { name: 'Crucifixo polia alta', grupo: 'C', series: '1x25', load: '25kg', interval: '50s', instructions: 'Série única com bastante volume', id: 4 },
+            7: { name: 'Tríceps francês corda polia baixa', grupo: 'C', series: '3x12-15', load: '35kg', interval: '45s', instructions: 'Puxe a corda em direção às coxas', id: 7 },
+            8: { name: 'Pulley tríceps barra reta', grupo: 'C', series: '3x12-15', load: '30kg', interval: '45s', instructions: 'Palmas para baixo, cotovelos fixos', id: 8 },
+            9: { name: 'Pulley tríceps supinado', grupo: 'C', series: '3x12-15', load: '25kg', interval: '45s', instructions: 'Palmas para cima, movimento controlado', id: 9 },
+            10: { name: 'Tríceps pulley corda', grupo: 'C', series: '3x12-15', load: '35kg', interval: '45s', instructions: 'Afaste a corda no final do movimento', id: 10 },
+            
+            // TREINO D (Pernas + Pull leve)
+            12: { name: 'Puxada frontal aberta (variação)', grupo: 'D', series: '4x8-10', load: '75kg', interval: '60s', instructions: 'Pegada mais fechada, puxe até queixo', id: 12 },
+            16: { name: 'Rosca Direta em Pé Polia baixa', grupo: 'D', series: '3x10-12', load: '35kg', interval: '50s', instructions: 'Cotovelos fixos, movimento controlado', id: 16 },
+            17: { name: 'Agachamento Livre', grupo: 'D', series: '4x8-10', load: '120kg', interval: '90s', instructions: 'Profundidade até paralelo, peito para cima', id: 17 },
+            18: { name: 'Legpress Horizontal', grupo: 'D', series: '4x8-10', load: '280kg', interval: '60s', instructions: 'Pés afastados, não tranque joelhos', id: 18 },
+            19: { name: 'Cadeira Adutora', grupo: 'D', series: '3x12-15', load: '80kg', interval: '45s', instructions: 'Aduto as coxas completamente', id: 19 }
         };
 
         function checkAdminLogin() {
@@ -894,9 +896,10 @@
 
             // Agrupar exercícios por categoria
             const grouped = {
-                push: [],
-                pull: [],
-                legs: []
+                A: [],
+                B: [],
+                C: [],
+                D: []
             };
             
             Object.entries(exercises).forEach(([id, ex]) => {
@@ -907,8 +910,8 @@
 
             // Renderizar por grupos
             let html = '';
-            const groupIcons = { push: '💪', pull: '🔙', legs: '🦵' };
-            const groupNames = { push: 'Push (Peito, Ombro, Tríceps)', pull: 'Pull (Costas, Bíceps)', legs: 'Legs (Pernas)' };
+            const groupIcons = { A: '📅', B: '📅', C: '📅', D: '📅' };
+            const groupNames = { A: 'TREINO A (Push Pesado)', B: 'TREINO B (Pull Pesado)', C: 'TREINO C (Push Moderado)', D: 'TREINO D (Pernas + Pull Leve)' };
             
             Object.entries(grouped).forEach(([group, items]) => {
                 if (items.length > 0) {
@@ -1320,12 +1323,12 @@
             let html = `<h3>📅 Treino de ${allUsers[selectedUser].name}</h3>`;
             html += `<form id="trainingForm" onsubmit="saveCompleteTraining(event)">`;
 
-            ['push', 'pull', 'legs'].forEach(grupo => {
+            ['A', 'B', 'C', 'D'].forEach(grupo => {
                 const groupExercises = Object.entries(allExercises).filter(([id, ex]) => ex.grupo === grupo);
                 const userGroupExercises = userTraining[grupo] || [];
 
                 html += `<div class="training-group">
-                    <h3>${grupo === 'push' ? '💪 Push' : grupo === 'pull' ? '🔙 Pull' : '🦵 Legs'}</h3>`;
+                    <h3>${grupo === 'A' ? '📅 TREINO A' : grupo === 'B' ? '📅 TREINO B' : grupo === 'C' ? '📅 TREINO C' : '📅 TREINO D'}</h3>`;
 
                 // Mostrar exercícios já adicionados
                 if (userGroupExercises.length > 0) {
@@ -1428,7 +1431,7 @@
             const form = document.getElementById('trainingForm');
             const formData = new FormData(form);
             
-            let userTraining = JSON.parse(localStorage.getItem(`training_${selectedUser}`)) || { push: [], pull: [], legs: [] };
+            let userTraining = JSON.parse(localStorage.getItem(`training_${selectedUser}`)) || { A: [], B: [], C: [], D: [] };
             let customTraining = JSON.parse(localStorage.getItem(`custom_training_${selectedUser}`)) || {};
 
             // Percorrer todos os checkboxes marcados

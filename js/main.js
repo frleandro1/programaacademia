@@ -592,7 +592,7 @@ async function loadTraining() {
 }
 
 function organizarExerciciosPorGrupo(exercicios) {
-    const grupos = { push: [], pull: [], legs: [] };
+    const grupos = { A: [], B: [], C: [], D: [] };
     
     exercicios.forEach(ex => {
         ex.completed = false; // Será atualizado pelo histórico
@@ -612,9 +612,10 @@ function renderizarTreino(exercises) {
     let completedExercises = 0;
 
     const groups = {
-        push: '💪 Push',
-        pull: '🔙 Pull',
-        legs: '🦵 Legs'
+        A: '📅 TREINO A',
+        B: '📅 TREINO B',
+        C: '📅 TREINO C',
+        D: '📅 TREINO D'
     };
 
     Object.keys(groups).forEach(group => {
