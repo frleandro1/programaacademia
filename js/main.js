@@ -225,6 +225,66 @@ const AVAILABLE_VIDEOS = [
     'Tríceps francês barra polia baixa.mp4'
 ];
 
+// Mapa de variações de nomes para vídeos
+const EXERCISE_VIDEO_MAP = {
+    // Crucifixo/Pecdeck
+    'crucifixo fly': 'Crucifixo polia alta.mp4',
+    'pecdeck maquina': 'Crucifixo polia alta.mp4',
+    'crucifixo polia alta': 'Crucifixo polia alta.mp4',
+    'fly': 'Crucifixo polia alta.mp4',
+    'pec deck': 'Crucifixo polia alta.mp4',
+    
+    // Tríceps - Francês/Corda/Pulley
+    'triceps francês': 'Tríceps francês barra polia baixa.mp4',
+    'triceps francês corda palia baixa': 'Tríceps francês barra polia baixa.mp4',
+    'triceps francês corda polia baixa': 'Tríceps francês barra polia baixa.mp4',
+    'triceps corda palia baixa': 'Tríceps francês barra polia baixa.mp4',
+    'pulley triceps': 'Tríceps francês barra polia baixa.mp4',
+    'pulley triceps supinado': 'Tríceps francês barra polia baixa.mp4',
+    'triceps pulley corda': 'Tríceps francês barra polia baixa.mp4',
+    'triceps pulley': 'Tríceps francês barra polia baixa.mp4',
+    
+    // Puxada Frontal
+    'puxada frontal': 'Puxada frontal aberta.mp4',
+    'puxada frontal aberta': 'Puxada frontal aberta.mp4',
+    'pulldown': 'Puxada frontal aberta.mp4',
+    'lat pulldown': 'Puxada frontal aberta.mp4',
+    
+    // Remada Sentada
+    'remada sentada': 'Puxada frontal aberta.mp4',
+    'remada sentada maquina': 'Puxada frontal aberta.mp4',
+    'seated row': 'Puxada frontal aberta.mp4',
+    
+    // Rosca Bíceps
+    'rosca biceps': 'Rosca em Pé Halteres.mp4',
+    'rosca biceps halteres': 'Rosca em Pé Halteres.mp4',
+    'rosca em pé halteres': 'Rosca em Pé Halteres.mp4',
+    'rosca direta em pé polia baixa': 'Rosca em Pé Halteres.mp4',
+    'barbell curl': 'Rosca em Pé Halteres.mp4',
+    'dumbbell curl': 'Rosca em Pé Halteres.mp4',
+    
+    // Leg Press
+    'agachamento': 'Agachamento Livre.mp4',
+    'agachamento livre': 'Agachamento Livre.mp4',
+    'legpress': 'Legpress Horizontal.mp4',
+    'leg press': 'Legpress Horizontal.mp4',
+    'legpress horizontal': 'Legpress Horizontal.mp4',
+    'cadeira adutora': 'Legpress Horizontal.mp4',
+    
+    // Desenvolvimento
+    'desenvolvimento': 'Desenvolvimento máquina.mp4',
+    'desenvolvimento maquina': 'Desenvolvimento máquina.mp4',
+    'shoulder press': 'Desenvolvimento máquina.mp4',
+    
+    // Supino
+    'supino': 'Supino reto barra.mp4',
+    'supino reto': 'Supino reto barra.mp4',
+    'supino reto barra': 'Supino reto barra.mp4',
+    'supino inclinado': 'Supino inclinado 30 halteres.mp4',
+    'supino inclinado halteres': 'Supino inclinado 30 halteres.mp4',
+    'supino inclinado 30 halteres': 'Supino inclinado 30 halteres.mp4'
+};
+
 // Função para encontrar o vídeo correspondente ao exercício
 function findVideoForExercise(exerciseName) {
     if (!exerciseName) {
@@ -235,13 +295,21 @@ function findVideoForExercise(exerciseName) {
     const nameNormalized = exerciseName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     console.log(`🎬 Procurando vídeo para: "${exerciseName}" (normalizado: "${nameNormalized}")`);
     
+    // Primeiro, tenta encontrar uma correspondência exata no mapa
+    if (EXERCISE_VIDEO_MAP[nameNormalized]) {
+        const videoName = EXERCISE_VIDEO_MAP[nameNormalized];
+        console.log(`✅ Encontrado no mapa: ${videoName}`);
+        return `./videos/${videoName}`;
+    }
+    
+    // Se não encontrar no mapa, tenta match parcial
     for (const video of AVAILABLE_VIDEOS) {
         const videoNormalized = video.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         
         // Verifica se o nome do exercício está contido no nome do vídeo ou vice-versa
         if (videoNormalized.includes(nameNormalized) || nameNormalized.includes(videoNormalized)) {
             const fullPath = `./videos/${video}`;
-            console.log(`✅ Encontrado vídeo: ${video}`);
+            console.log(`✅ Encontrado vídeo por match: ${video}`);
             return fullPath;
         }
     }
