@@ -164,29 +164,68 @@
     </div>
 
     <script>
-        const USERS = {
-            'Leandro': {
-                password: '123456',
-                id: 1,
-                name: 'Leandro Barba',
-                routine: 'PPL 1 NOVO',
-                goal: 'Redução de gordura/Hipertrofia - Intermediário'
-            },
-            'João': {
-                password: 'senha123',
-                id: 2,
-                name: 'João Silva',
-                routine: 'Full Body',
-                goal: 'Ganho de Massa'
-            },
-            'Maria': {
-                password: 'senha123',
-                id: 3,
-                name: 'Maria Santos',
-                routine: 'ABCD',
-                goal: 'Ganho de Massa'
+        // Carregar usuários do localStorage (criados no admin)
+        let USERS = {};
+        
+        function loadUsersFromStorage() {
+            const allUsers = localStorage.getItem('allUsers');
+            if (allUsers) {
+                const users = JSON.parse(allUsers);
+                // Converter do formato do admin para o formato do login
+                Object.entries(users).forEach(([username, user]) => {
+                    USERS[username] = {
+                        password: user.password,
+                        id: user.id || Math.random(),
+                        name: user.name,
+                        routine: user.routine,
+                        goal: user.goal
+                    };
+                });
+                console.log('✅ Usuários carregados do localStorage:', Object.keys(USERS));
+                updateDemoUsersDisplay();
+            } else {
+                // Usar usuários padrão se nenhum foi criado
+                USERS = {
+                    'Leandro': {
+                        password: '123456',
+                        id: 1,
+                        name: 'Leandro Barba',
+                        routine: 'PPL 1 NOVO',
+                        goal: 'Redução de gordura/Hipertrofia - Intermediário'
+                    },
+                    'João': {
+                        password: 'senha123',
+                        id: 2,
+                        name: 'João Silva',
+                        routine: 'Full Body',
+                        goal: 'Ganho de Massa'
+                    },
+                    'Maria': {
+                        password: 'senha123',
+                        id: 3,
+                        name: 'Maria Santos',
+                        routine: 'ABCD',
+                        goal: 'Ganho de Massa'
+                    }
+                };
+                console.log('⚠️ Usando usuários padrão');
             }
-        };
+        }
+
+        function updateDemoUsersDisplay() {
+            const demoDiv = document.querySelector('.demo-users');
+            if (demoDiv && Object.keys(USERS).length > 0) {
+                let html = '<strong>📋 Usuários disponíveis:</strong><br>';
+                Object.entries(USERS).forEach(([username, user], index) => {
+                    if (index < 3) { // Mostrar apenas os 3 primeiros
+                        html += `${username} • `;
+                    }
+                });
+                // Remove o último " • "
+                html = html.slice(0, -3);
+                demoDiv.innerHTML = html;
+            }
+        }
 
         function handleLogin(event) {
             event.preventDefault();
@@ -200,8 +239,11 @@
             if (!user || user.password !== password) {
                 errorDiv.textContent = '❌ Usuário ou senha incorretos!';
                 errorDiv.style.display = 'block';
+                console.warn(`❌ Login falhou: username=${username}, usuários disponíveis:`, Object.keys(USERS));
                 return;
             }
+
+            console.log(`✅ Login bem-sucedido: ${username}`);
 
             // Salva informações do usuário
             localStorage.setItem('currentUser', JSON.stringify({
@@ -218,6 +260,7 @@
 
         // Se já está logado, redireciona para dashboard
         window.addEventListener('load', () => {
+            loadUsersFromStorage();
             const currentUser = localStorage.getItem('currentUser');
             if (currentUser) {
                 window.location.href = 'index.html';
