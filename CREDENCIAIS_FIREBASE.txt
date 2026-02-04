@@ -1,0 +1,48 @@
+# ✅ Últimas Credenciais Necessárias
+
+Seu projeto está criado! 🎉
+
+## Informações que já temos:
+```
+projectId: academiatreinoapp-d2004
+databaseURL: https://academiatreinoapp-d2004-default-rtdb.firebaseio.com
+```
+
+## Preciso de mais 5 informações:
+
+### 📍 Passo 1: Abrir Configurações
+1. Clique na ⚙️ **engrenagem** no topo direito
+2. Clique **"Configurações do Projeto"**
+
+### 📍 Passo 2: Copiar Credenciais Web
+1. Desça até **"Seus apps"**
+2. Você verá um app com ícone **Web (</> )**
+3. Se não existir, clique **"+Adicionar app"** e selecione **Web**
+4. Copie o código que aparece
+
+Vai parecer com:
+```javascript
+const firebaseConfig = {
+  apiKey: "AIzaSyDxxx...",
+  authDomain: "academiatreinoapp-d2004.firebaseapp.com",
+  databaseURL: "https://academiatreinoapp-d2004-default-rtdb.firebaseio.com",
+  projectId: "academiatreinoapp-d2004",
+  storageBucket: "academiatreinoapp-d2004.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abc123"
+};
+```
+
+## ✏️ Compartilhe Comigo:
+
+Copie e preencha apenas essas 5 linhas:
+
+```
+apiKey: [COPIE_AQUI]
+authDomain: [COPIE_AQUI]
+storageBucket: [COPIE_AQUI]
+messagingSenderId: [COPIE_AQUI]
+appId: [COPIE_AQUI]
+```
+
+Assim que você passar, vou integrar TUDO ao projeto! 🚀

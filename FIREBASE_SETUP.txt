@@ -1,0 +1,46 @@
+# 📋 Collect suas Credenciais Firebase
+
+## Passo 1: Obter as Credenciais
+
+No Firebase Console:
+1. Clique na **engrenagem ⚙️** (Configurações)
+2. Vá em **Seu Projeto** → **Configurações do Projeto**
+3. Localize a seção **Seus apps**
+4. Clique em **Web** (</> ícone)
+5. Copie o código de configuração
+
+## Passo 2: Preencher as Informações
+
+Você precisa das seguintes informações:
+
+```javascript
+const firebaseConfig = {
+  apiKey: "XXXXXXXXXXXXXXXXXXXXXXXXXX",           // Linha 1
+  authDomain: "seu-projeto.firebaseapp.com",      // Linha 2
+  databaseURL: "https://seu-projeto.firebaseio.com",  // Linha 3
+  projectId: "seu-projeto",                       // Linha 4
+  storageBucket: "seu-projeto.appspot.com",       // Linha 5
+  messagingSenderId: "123456789",                 // Linha 6
+  appId: "1:123456789:web:abc123def456"          // Linha 7
+};
+```
+
+## Passo 3: Compartilhe Comigo
+
+Copie cada linha da sua configuração do Firebase e compartilhe:
+
+```
+apiKey: ???
+authDomain: ???
+databaseURL: ???
+projectId: ???
+storageBucket: ???
+messagingSenderId: ???
+appId: ???
+```
+
+---
+
+**⚠️ SEGURANÇA**: Essas credenciais são públicas no frontend, mas estão OK no Firebase (é por design dele).
+
+Assim que você compartilhar, vou integrar tudo! 🚀
