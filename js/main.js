@@ -262,8 +262,11 @@ const EXERCISE_VIDEO_MAP = {
     'puxada frontal': 'Puxada frontal aberta.mp4',
     'puxada frontal aberta': 'Puxada frontal aberta.mp4',
     'puxada frontal aberta variacao': 'Puxada frontal aberta (1).mp4',
+    'puxada frontal aberta (variacao)': 'Puxada frontal aberta (1).mp4',
     'puxada frontal aberta (variação)': 'Puxada frontal aberta (1).mp4',
     'puxada frontal variacao': 'Puxada frontal aberta (1).mp4',
+    'puxada frontal variacao (1)': 'Puxada frontal aberta (1).mp4',
+    'puxada frontal (variação)': 'Puxada frontal aberta (1).mp4',
     'pulldown': 'Puxada frontal aberta.mp4',
     'lat pulldown': 'Puxada frontal aberta.mp4',
     
@@ -311,19 +314,28 @@ function findVideoForExercise(exerciseName) {
         return null;
     }
     
-    const nameNormalized = exerciseName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const nameNormalized = exerciseName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     console.log(`🎬 Procurando vídeo para: "${exerciseName}" (normalizado: "${nameNormalized}")`);
     
     // Primeiro, tenta encontrar uma correspondência exata no mapa
     if (EXERCISE_VIDEO_MAP[nameNormalized]) {
         const videoName = EXERCISE_VIDEO_MAP[nameNormalized];
-        console.log(`✅ Encontrado no mapa: ${videoName}`);
+        console.log(`✅ Encontrado no mapa (exato): ${videoName}`);
         return `./videos/${videoName}`;
     }
     
-    // Se não encontrar no mapa, tenta match parcial
+    // Segundo, tenta match parcial no mapa (útil para variações)
+    for (const mapKey of Object.keys(EXERCISE_VIDEO_MAP)) {
+        if (nameNormalized.includes(mapKey) || mapKey.includes(nameNormalized)) {
+            const videoName = EXERCISE_VIDEO_MAP[mapKey];
+            console.log(`✅ Encontrado no mapa (parcial): ${videoName}`);
+            return `./videos/${videoName}`;
+        }
+    }
+    
+    // Terceiro, tenta match parcial nos vídeos disponíveis
     for (const video of AVAILABLE_VIDEOS) {
-        const videoNormalized = video.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const videoNormalized = video.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
         
         // Verifica se o nome do exercício está contido no nome do vídeo ou vice-versa
         if (videoNormalized.includes(nameNormalized) || nameNormalized.includes(videoNormalized)) {
