@@ -848,24 +848,45 @@
         }
 
         // 🔥 Sincronizar treino do usuário com Firebase
-        function saveTrainingToFirebase(username, trainingData) {
+        function saveTrainingToFirebase(username, trainingData, retryCount = 0) {
+            const MAX_RETRIES = 5;
+            
+            console.log(`🔄 Tentativa ${retryCount + 1} de sincronizar treino: ${username}`);
+            
             if (!firebaseReady || !db) {
-                console.warn('⚠️ Firebase não disponível, treino salvo apenas localmente');
-                console.warn('firebaseReady:', firebaseReady, '| db:', db ? 'existe' : 'null');
+                console.warn(`⚠️ Firebase não pronto (firebaseReady=${firebaseReady}, db=${db ? 'existe' : 'null'})`);
+                
+                if (retryCount < MAX_RETRIES) {
+                    console.log(`🔄 Tentando novamente em 500ms... (Tentativa ${retryCount + 1}/${MAX_RETRIES})`);
+                    setTimeout(() => {
+                        saveTrainingToFirebase(username, trainingData, retryCount + 1);
+                    }, 500);
+                } else {
+                    console.error('❌ Falha após múltiplas tentativas. Treino salvo apenas localmente.');
+                }
                 return;
             }
 
             try {
                 const path = `usuarios/${username}/treinos`;
-                console.log('📤 Sincronizando treino:', { username, path, dataKeys: Object.keys(trainingData) });
+                console.log(`📤 Sincronizando treino em: ${path}`);
+                console.log('📊 Dados:', trainingData);
                 
                 db.ref(path).set(trainingData)
                     .then(() => {
                         console.log('✅ Treino sincronizado com sucesso no Firebase:', username);
+                        console.log('🎯 Dados salvos:', trainingData);
                     })
                     .catch(error => {
                         console.error('❌ Erro ao sincronizar treino:', error.code, error.message);
-                        console.error('Detalhes:', error);
+                        
+                        // Tentar novamente se for erro de conexão
+                        if (error.code === 'NETWORK_ERROR' && retryCount < MAX_RETRIES) {
+                            console.log('🔄 Erro de rede, tentando novamente...');
+                            setTimeout(() => {
+                                saveTrainingToFirebase(username, trainingData, retryCount + 1);
+                            }, 1000);
+                        }
                     });
             } catch (error) {
                 console.error('❌ Erro crítico na sincronização:', error.message);
@@ -1035,7 +1056,7 @@
         }
 
         function addExerciseToTraining(username, grupo, exerciseId) {
-            console.log(`Adding exercise ${exerciseId} to ${username} group ${grupo}`);
+            console.log(`📌 Adicionando exercício ${exerciseId} para ${username} no grupo ${grupo}`);
             
             let userTraining = JSON.parse(localStorage.getItem(`training_${username}`)) || { push: [], pull: [], legs: [] };
             if (!userTraining[grupo]) userTraining[grupo] = [];
@@ -1044,20 +1065,22 @@
             if (!userTraining[grupo].includes(exId)) {
                 userTraining[grupo].push(exId);
                 localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
+                console.log('✅ Exercício salvo em localStorage:', userTraining);
                 
                 // 🔥 Sincronizar com Firebase
                 saveTrainingToFirebase(username, userTraining);
                 
-                console.log('Exercise added. New training:', userTraining);
+                console.log('✨ Exercício adicionado com sucesso');
                 showSuccess('Exercício adicionado com sucesso!');
                 loadUserTraining(); // Recarrega a interface
             } else {
-                console.log('Exercise already in training');
+                console.log('⚠️ Exercício já existe no treino');
             }
         }
 
         function saveExerciseCustomization(username, exerciseId, series, load) {
-            console.log(`Saving customization for exercise ${exerciseId}: series=${series}, load=${load}`);
+            console.log(`💾 Salvando customização do exercício ${exerciseId} para ${username}`);
+            console.log(`📋 Séries: ${series}, Carga: ${load}`);
             
             let customTraining = JSON.parse(localStorage.getItem(`custom_training_${username}`)) || {};
             customTraining[exerciseId] = {
@@ -1066,6 +1089,7 @@
             };
             
             localStorage.setItem(`custom_training_${username}`, JSON.stringify(customTraining));
+            console.log('✅ Customização salva em localStorage');
             
             // 🔥 Sincronizar com Firebase
             saveTrainingToFirebase(username, customTraining);
@@ -1080,6 +1104,7 @@
                 if (userTraining[grupo]) {
                     userTraining[grupo] = userTraining[grupo].filter(id => id !== parseInt(exerciseId));
                     localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
+                    console.log('✅ Exercício removido de localStorage');
                     
                     // 🔥 Sincronizar com Firebase
                     saveTrainingToFirebase(username, userTraining);
