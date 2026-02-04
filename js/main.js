@@ -1232,13 +1232,58 @@ function finishSummary() {
 // ============ SELETOR DE TREINO ============
 
 function showTreinoSelector() {
-    const modal = document.getElementById('changeTreinoModal');
-    modal.style.display = 'flex';
+    // Remove modal anterior se existir
+    let modal = document.getElementById('changeTreinoModal');
+    if (modal) {
+        modal.remove();
+    }
+    
+    // Cria novo modal
+    modal = document.createElement('div');
+    modal.id = 'changeTreinoModal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 40px; border-radius: 12px; text-align: center; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h2 style="color: #1a3a52; margin-bottom: 10px;">Selecione seu Treino</h2>
+            <p style="color: #666; margin-bottom: 25px;">Escolha qual treino você quer fazer agora</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <button onclick="switchTreino('A')" style="padding: 20px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">
+                    📅 TREINO A<br><small>Push Pesado</small>
+                </button>
+                <button onclick="switchTreino('B')" style="padding: 20px; background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">
+                    📅 TREINO B<br><small>Pull Pesado</small>
+                </button>
+                <button onclick="switchTreino('C')" style="padding: 20px; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">
+                    📅 TREINO C<br><small>Push Moderado</small>
+                </button>
+                <button onclick="switchTreino('D')" style="padding: 20px; background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">
+                    📅 TREINO D<br><small>Pernas+Pull Leve</small>
+                </button>
+            </div>
+            <button onclick="closeTreinoSelector()" style="width: 100%; padding: 10px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Cancelar</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
 }
 
 function closeTreinoSelector() {
     const modal = document.getElementById('changeTreinoModal');
-    modal.style.display = 'none';
+    if (modal) {
+        modal.remove();
+    }
 }
 
 function switchTreino(treino) {
