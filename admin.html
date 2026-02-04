@@ -377,11 +377,18 @@
         <!-- Tab: Usuários -->
         <div id="usuarios" class="tab-content active">
             <h2>Gerenciar Usuários</h2>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
                 <button class="btn-primary" onclick="openUserModal()">+ Novo Usuário</button>
                 <button class="btn-secondary" onclick="syncAllUsersToFirebase()" style="background: #4CAF50;">
                     🔄 Sincronizar Firebase
                 </button>
+                <button class="btn-secondary" onclick="testFirebaseConnection()" style="background: #ff9800;">
+                    🔧 Testar Firebase
+                </button>
+            </div>
+            
+            <div style="padding: 10px; background: #f0f0f0; border-radius: 6px; margin-bottom: 15px; display: none;" id="firebaseStatus">
+                <p id="firebaseStatusText">⏳ Verificando Firebase...</p>
             </div>
             
             <div class="success-message" id="successMsg"></div>
@@ -562,29 +569,65 @@
         // Variáveis globais para Firebase
         let db = null;
         let firebaseReady = false;
+        let firebaseInitAttempts = 0;
+        const MAX_FIREBASE_ATTEMPTS = 3;
 
         // Inicializar Firebase no admin
         function initializeFirebaseAdmin() {
+            if (firebaseInitAttempts >= MAX_FIREBASE_ATTEMPTS) {
+                console.error('❌ Falha ao inicializar Firebase após múltiplas tentativas');
+                return;
+            }
+            
+            firebaseInitAttempts++;
+            console.log(`🔄 Tentativa ${firebaseInitAttempts} de inicializar Firebase...`);
+            
             try {
+                // Verificar se Firebase já está carregado globalmente
+                if (typeof firebase !== 'undefined') {
+                    initializeFirebaseConfig();
+                    return;
+                }
+                
                 // Carregar Firebase dinamicamente
                 const script = document.createElement('script');
                 script.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+                script.async = true;
                 script.onload = () => {
+                    console.log('✅ Firebase App carregado');
                     const script2 = document.createElement('script');
                     script2.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+                    script2.async = true;
                     script2.onload = () => {
+                        console.log('✅ Firebase Database carregado');
                         initializeFirebaseConfig();
+                    };
+                    script2.onerror = () => {
+                        console.error('❌ Erro ao carregar Firebase Database');
+                        setTimeout(initializeFirebaseAdmin, 1000);
                     };
                     document.head.appendChild(script2);
                 };
+                script.onerror = () => {
+                    console.error('❌ Erro ao carregar Firebase App');
+                    setTimeout(initializeFirebaseAdmin, 1000);
+                };
                 document.head.appendChild(script);
             } catch (error) {
-                console.warn('⚠️ Firebase não disponível:', error);
+                console.error('❌ Erro na inicialização:', error);
+                setTimeout(initializeFirebaseAdmin, 1000);
             }
         }
 
         function initializeFirebaseConfig() {
             try {
+                // Verificar se Firebase está disponível
+                if (typeof firebase === 'undefined') {
+                    console.warn('⚠️ Firebase não carregado ainda, tentando novamente...');
+                    setTimeout(initializeFirebaseAdmin, 1000);
+                    return;
+                }
+
                 const firebaseConfig = {
                     apiKey: "AIzaSyB5CPHE4fvlkZYa0KkINr-NlhIMPYs4qAM",
                     authDomain: "academiatreinoapp-d2004.firebaseapp.com",
@@ -596,12 +639,20 @@
                     measurementId: "G-8TVK5XD653"
                 };
 
-                firebase.initializeApp(firebaseConfig);
+                // Evitar reinicializar se já foi inicializado
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                
                 db = firebase.database();
                 firebaseReady = true;
-                console.log('✅ Firebase inicializado no painel admin!');
+                console.log('✅ Firebase inicializado com sucesso no painel admin!');
+                console.log('🔥 Database URL:', firebaseConfig.databaseURL);
             } catch (error) {
-                console.warn('⚠️ Erro ao inicializar Firebase:', error);
+                console.error('❌ Erro ao configurar Firebase:', error.message);
+                if (firebaseInitAttempts < MAX_FIREBASE_ATTEMPTS) {
+                    setTimeout(initializeFirebaseAdmin, 2000);
+                }
             }
         }
 
@@ -787,20 +838,100 @@
             alert(`✅ ${syncedCount} usuários sincronizados com sucesso!`);
         }
 
+        // 🔧 Testar conexão com Firebase
+        function testFirebaseConnection() {
+            const statusDiv = document.getElementById('firebaseStatus');
+            const statusText = document.getElementById('firebaseStatusText');
+            
+            statusDiv.style.display = 'block';
+            statusText.innerHTML = '⏳ Testando conexão com Firebase...';
+            
+            console.log('=== TESTE DE CONEXÃO FIREBASE ===');
+            console.log('firebaseReady:', firebaseReady);
+            console.log('db:', db ? '✅ Existe' : '❌ Não existe');
+            console.log('typeof firebase:', typeof firebase);
+            
+            if (!firebaseReady || !db) {
+                statusText.innerHTML = `
+                    ❌ <strong>Firebase não inicializado!</strong><br>
+                    firebaseReady: ${firebaseReady}<br>
+                    db: ${db ? 'existe' : 'null'}<br>
+                    <small>Atualize a página e tente novamente</small>
+                `;
+                alert('❌ Firebase não está inicializado. Atualize a página.');
+                return;
+            }
+            
+            // Tentar escrever um teste
+            const testRef = db.ref('admin-test/connection-check');
+            const testData = {
+                timestamp: new Date().toISOString(),
+                test: true
+            };
+            
+            testRef.set(testData)
+                .then(() => {
+                    console.log('✅ Teste de escrita bem-sucedido');
+                    statusText.innerHTML = `
+                        ✅ <strong>Conexão Firebase OK!</strong><br>
+                        • Firebase: ${firebaseReady ? '✅ Inicializado' : '❌ Não'}<br>
+                        • Database: ${db ? '✅ Conectado' : '❌ Não'}<br>
+                        • Escrita: ✅ Funcionando<br>
+                        <small>Dados sincronizados com sucesso</small>
+                    `;
+                    alert('✅ Firebase está funcionando corretamente!');
+                })
+                .catch(error => {
+                    console.error('❌ Erro no teste:', error);
+                    statusText.innerHTML = `
+                        ❌ <strong>Erro na conexão!</strong><br>
+                        Código: ${error.code}<br>
+                        Mensagem: ${error.message}<br>
+                        <small style="color: #d32f2f;">Verifique as regras de segurança do Firebase</small>
+                    `;
+                    alert(`❌ Erro ao conectar com Firebase: ${error.message}`);
+                });
+        }
+
         // 🔥 Sincronizar treino do usuário com Firebase
         function saveTrainingToFirebase(username, trainingData) {
             if (!firebaseReady || !db) {
                 console.warn('⚠️ Firebase não disponível, treino salvo apenas localmente');
+                console.warn('firebaseReady:', firebaseReady, '| db:', db ? 'existe' : 'null');
                 return;
             }
 
             try {
-                db.ref(`usuarios/${username}/treinos`).set(trainingData)
+                const path = `usuarios/${username}/treinos`;
+                console.log('📤 Sincronizando treino:', { username, path, dataKeys: Object.keys(trainingData) });
+                
+                db.ref(path).set(trainingData)
                     .then(() => {
-                        console.log('✅ Treino sincronizado no Firebase:', username);
+                        console.log('✅ Treino sincronizado com sucesso no Firebase:', username);
                     })
                     .catch(error => {
-                        console.error('❌ Erro ao sincronizar treino:', error.message);
+                        console.error('❌ Erro ao sincronizar treino:', error.code, error.message);
+                        console.error('Detalhes:', error);
+                    });
+            } catch (error) {
+                console.error('❌ Erro crítico na sincronização:', error.message);
+            }
+        }
+
+        // Salvar usuário no Firebase
+        function saveUserToFirebase(username, userData) {
+            if (!firebaseReady || !db) {
+                console.warn('⚠️ Firebase não disponível ainda, salvando apenas localStorage');
+                return;
+            }
+
+            try {
+                db.ref(`usuarios/${username}`).set(userData)
+                    .then(() => {
+                        console.log('✅ Usuário salvo no Firebase:', username);
+                    })
+                    .catch(error => {
+                        console.error('❌ Erro ao salvar em Firebase:', error.message);
                     });
             } catch (error) {
                 console.warn('⚠️ Firebase erro:', error.message);
