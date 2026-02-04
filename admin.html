@@ -920,34 +920,73 @@
         function saveTrainingToFirebase(username, trainingData, retryCount = 0) {
             const MAX_RETRIES = 5;
             
-            console.log(`🔄 Tentativa ${retryCount + 1} de sincronizar treino: ${username}`);
+            console.log('═════════════════════════════════════════════');
+            console.log('🔥 SINCRONIZANDO TREINO COM FIREBASE');
+            console.log('═════════════════════════════════════════════');
+            console.log(`Tentativa: ${retryCount + 1}/${MAX_RETRIES + 1}`);
+            console.log('👤 Usuário:', username);
+            console.log('─────────────────────────────────────────────');
+            
+            console.log('🔥 Status Firebase:');
+            console.log('  • firebaseReady:', firebaseReady);
+            console.log('  • db existe:', db ? 'SIM' : 'NÃO');
+            console.log('  • typeof firebase:', typeof firebase);
+            console.log('─────────────────────────────────────────────');
             
             if (!firebaseReady || !db) {
-                console.warn(`⚠️ Firebase não pronto (firebaseReady=${firebaseReady}, db=${db ? 'existe' : 'null'})`);
+                console.warn(`⚠️ Firebase não pronto!`);
+                console.warn(`   firebaseReady=${firebaseReady}`);
+                console.warn(`   db=${db ? 'existe' : 'null'}`);
                 
                 if (retryCount < MAX_RETRIES) {
-                    console.log(`🔄 Tentando novamente em 500ms... (Tentativa ${retryCount + 1}/${MAX_RETRIES})`);
+                    console.log(`🔄 Tentando novamente em 1s... (Tentativa ${retryCount + 2}/${MAX_RETRIES + 1})`);
                     setTimeout(() => {
                         saveTrainingToFirebase(username, trainingData, retryCount + 1);
-                    }, 500);
+                    }, 1000);
                 } else {
-                    console.error('❌ Falha após múltiplas tentativas. Treino salvo apenas localmente.');
+                    console.error('❌❌ FALHA APÓS MÚLTIPLAS TENTATIVAS!');
+                    console.error('⚠️ Treino salvo APENAS em localStorage!');
                 }
                 return;
             }
 
             try {
                 const path = `usuarios/${username}/treinos`;
-                console.log(`📤 Sincronizando treino em: ${path}`);
-                console.log('📊 Dados:', trainingData);
+                console.log(`📤 Sincronizando em:`, path);
+                console.log('📊 Dados a sincronizar:', JSON.stringify(trainingData, null, 2));
                 
                 db.ref(path).set(trainingData)
                     .then(() => {
-                        console.log('✅ Treino sincronizado com sucesso no Firebase:', username);
-                        console.log('🎯 Dados salvos:', trainingData);
+                        console.log('═════════════════════════════════════════════');
+                        console.log('✅✅✅ TREINO SINCRONIZADO COM SUCESSO! ✅✅✅');
+                        console.log('═════════════════════════════════════════════');
+                        console.log('📍 Localização:', path);
+                        console.log('📊 Dados:', trainingData);
                     })
                     .catch(error => {
-                        console.error('❌ Erro ao sincronizar treino:', error.code, error.message);
+                        console.error('═════════════════════════════════════════════');
+                        console.error('❌ ERRO AO SINCRONIZAR TREINO!');
+                        console.error('═════════════════════════════════════════════');
+                        console.error('Código de erro:', error.code);
+                        console.error('Mensagem:', error.message);
+                        console.error('Objeto completo:', error);
+                        
+                        // Tentar novamente se for erro de rede
+                        if ((error.code === 'NETWORK_ERROR' || error.message?.includes('NETWORK')) && retryCount < MAX_RETRIES) {
+                            console.log('🔄 Erro de rede, tentando novamente...');
+                            setTimeout(() => {
+                                saveTrainingToFirebase(username, trainingData, retryCount + 1);
+                            }, 2000);
+                        }
+                    });
+            } catch (error) {
+                console.error('═════════════════════════════════════════════');
+                console.error('❌ ERRO CRÍTICO NA SINCRONIZAÇÃO!');
+                console.error('═════════════════════════════════════════════');
+                console.error('Mensagem:', error.message);
+                console.error('Stack:', error.stack);
+            }
+        }
                         
                         // Tentar novamente se for erro de conexão
                         if (error.code === 'NETWORK_ERROR' && retryCount < MAX_RETRIES) {
@@ -1125,25 +1164,54 @@
         }
 
         function addExerciseToTraining(username, grupo, exerciseId) {
-            console.log(`📌 Adicionando exercício ${exerciseId} para ${username} no grupo ${grupo}`);
+            console.log('═════════════════════════════════════════════');
+            console.log('📌 ADICIONANDO EXERCÍCIO AO TREINO');
+            console.log('═════════════════════════════════════════════');
+            console.log('👤 Usuário:', username);
+            console.log('💪 Grupo:', grupo);
+            console.log('🏋️ Exercício ID:', exerciseId);
+            console.log('─────────────────────────────────────────────');
             
-            let userTraining = JSON.parse(localStorage.getItem(`training_${username}`)) || { push: [], pull: [], legs: [] };
-            if (!userTraining[grupo]) userTraining[grupo] = [];
+            // Verificar Firebase
+            console.log('🔥 Status Firebase:');
+            console.log('  • firebaseReady:', firebaseReady);
+            console.log('  • db existe:', db ? 'SIM' : 'NÃO');
             
-            const exId = parseInt(exerciseId);
-            if (!userTraining[grupo].includes(exId)) {
-                userTraining[grupo].push(exId);
-                localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
-                console.log('✅ Exercício salvo em localStorage:', userTraining);
+            try {
+                let userTraining = JSON.parse(localStorage.getItem(`training_${username}`)) || { push: [], pull: [], legs: [] };
+                if (!userTraining[grupo]) userTraining[grupo] = [];
                 
-                // 🔥 Sincronizar com Firebase
-                saveTrainingToFirebase(username, userTraining);
+                console.log('📊 Treino atual:', userTraining);
                 
-                console.log('✨ Exercício adicionado com sucesso');
-                showSuccess('Exercício adicionado com sucesso!');
-                loadUserTraining(); // Recarrega a interface
-            } else {
-                console.log('⚠️ Exercício já existe no treino');
+                const exId = parseInt(exerciseId);
+                
+                if (!userTraining[grupo].includes(exId)) {
+                    userTraining[grupo].push(exId);
+                    
+                    console.log('✅ Exercício adicionado ao array local:', userTraining[grupo]);
+                    
+                    // Salvar em localStorage
+                    localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
+                    console.log('✅ SALVO em localStorage!');
+                    
+                    // 🔥 Sincronizar com Firebase
+                    console.log('📤 ENVIANDO para Firebase...');
+                    saveTrainingToFirebase(username, userTraining);
+                    
+                    console.log('═════════════════════════════════════════════');
+                    console.log('✨ Exercício adicionado com sucesso!');
+                    console.log('═════════════════════════════════════════════');
+                    
+                    showSuccess('✅ Exercício adicionado com sucesso!');
+                    loadUserTraining(); // Recarrega a interface
+                } else {
+                    console.log('⚠️ Exercício já existe no treino');
+                    alert('⚠️ Este exercício já está no treino!');
+                }
+            } catch (error) {
+                console.error('❌ ERRO ao adicionar exercício:', error);
+                console.error('Stack:', error.stack);
+                alert('❌ Erro: ' + error.message);
             }
         }
 
