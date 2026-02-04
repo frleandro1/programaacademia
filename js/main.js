@@ -195,7 +195,7 @@ const DEMO_DATA = {
             id: 1,
             name: 'Supino reto barra',
             series: '3x12 drop set',
-            load: '10-15',
+            load: '80kg',
             interval: '50s',
             instructions: '+3 séries normais (10-12 repetições), na última série + drop set, Reduz 30% da carga + continua até a falha, Reduz mais 30% + continua até a falha',
             completed: false
@@ -204,13 +204,22 @@ const DEMO_DATA = {
             id: 2,
             name: 'Supino inclinado 30 halteres',
             series: '3x10/10/6',
-            load: '10-15',
+            load: '20kg',
             interval: '50s',
             instructions: '+3 blocos: 1ª vez: 10 repetições (mesma carga), 2ª vez: 10 repetições (com carga maior, cerca de +20%), 3ª vez: 6 repetições (com carga maior, cerca de +20%)',
             completed: false
         },
         {
             id: 3,
+            name: 'Crucifixo Fly ou PecDeck máquina',
+            series: '3x12',
+            load: '40kg',
+            interval: '45s',
+            instructions: 'Movimento controlado, puxe em direção ao peito. Retorne com controle até sentir alongamento no peitoral.',
+            completed: false
+        },
+        {
+            id: 4,
             name: 'Crucifixo polia alta',
             series: '1x25',
             load: '25kg',
@@ -219,61 +228,142 @@ const DEMO_DATA = {
             completed: false
         },
         {
-            id: 4,
+            id: 5,
             name: 'Desenvolvimento máquina',
             series: '4x12',
-            load: '25kg',
+            load: '60kg',
             interval: '50s',
-            instructions: 'Suba os halteres acima da cabeça com controle.',
+            instructions: 'Suba os halteres acima da cabeça com controle. Cotovelos nunca trancam completamente.',
             completed: false
         },
         {
-            id: 5,
+            id: 6,
             name: 'Tríceps francês barra polia baixa',
             series: '4x12',
-            load: '25kg',
+            load: '40kg',
             interval: '50s',
-            instructions: 'Cotovelos fixos. Estenda completamente os braços no final.',
+            instructions: 'Cotovelos fixos. Estenda completamente os braços no final com controle.',
+            completed: false
+        },
+        {
+            id: 7,
+            name: 'Tríceps francês corda polia baixa',
+            series: '3x12-15',
+            load: '35kg',
+            interval: '45s',
+            instructions: 'Puxe a corda em direção às coxas com os cotovelos fixos. Estenda completamente no final.',
+            completed: false
+        },
+        {
+            id: 8,
+            name: 'Pulley tríceps barra reta',
+            series: '3x12-15',
+            load: '30kg',
+            interval: '45s',
+            instructions: 'Palmas para baixo, cotovelos fixos. Estenda os braços completamente no final do movimento.',
+            completed: false
+        },
+        {
+            id: 9,
+            name: 'Pulley tríceps supinado',
+            series: '3x12-15',
+            load: '25kg',
+            interval: '45s',
+            instructions: 'Palmas para cima. Movimento controlado com ênfase na contração do tríceps.',
+            completed: false
+        },
+        {
+            id: 10,
+            name: 'Tríceps pulley corda',
+            series: '3x12-15',
+            load: '35kg',
+            interval: '45s',
+            instructions: 'Afaste a corda no final do movimento. Controle a volta sem usar impulso.',
             completed: false
         }
     ],
     pull: [
         {
-            id: 6,
+            id: 11,
             name: 'Puxada frontal aberta',
             series: '4x8-10',
-            load: '50kg',
+            load: '80kg',
             interval: '60s',
             instructions: 'Puxe até o peito. Mantenha o peito erguido e puxe com a escápula.',
             completed: false
         },
         {
-            id: 7,
+            id: 12,
+            name: 'Puxada frontal aberta (variação)',
+            series: '4x8-10',
+            load: '75kg',
+            interval: '60s',
+            instructions: 'Pegada um pouco mais fechada. Puxe até a altura do queixo.',
+            completed: false
+        },
+        {
+            id: 13,
+            name: 'Remada sentada máquina',
+            series: '4x10-12',
+            load: '90kg',
+            interval: '60s',
+            instructions: 'Puxe em direção ao abdômen. Mantenha as costas eretas durante todo o movimento.',
+            completed: false
+        },
+        {
+            id: 14,
             name: 'Rosca em Pé Halteres',
             series: '3x8-10',
-            load: '15kg',
+            load: '18kg',
             interval: '60s',
-            instructions: 'Cotovelos fixos na lateral. Movimento só do antebraço.',
+            instructions: 'Cotovelos fixos na lateral. Movimento só do antebraço. Sem balançar o corpo.',
+            completed: false
+        },
+        {
+            id: 15,
+            name: 'Rosca Bíceps Halteres',
+            series: '3x8-10',
+            load: '18kg',
+            interval: '60s',
+            instructions: 'Movimento alternado ou simultâneo. Cotovelo fixo, apenas o antebraço se move.',
+            completed: false
+        },
+        {
+            id: 16,
+            name: 'Rosca Direta em Pé Polia baixa',
+            series: '3x10-12',
+            load: '35kg',
+            interval: '50s',
+            instructions: 'Pegada reta. Cotovelos fixos. Movimento controlado tanto na subida quanto na descida.',
             completed: false
         }
     ],
     legs: [
         {
-            id: 8,
+            id: 17,
             name: 'Agachamento Livre',
             series: '4x8-10',
-            load: '80kg',
+            load: '120kg',
             interval: '90s',
-            instructions: 'Joelhos acompanham a direção dos pés. Peito para cima durante todo o movimento.',
+            instructions: 'Joelhos acompanham a direção dos pés. Peito para cima durante todo o movimento. Profundidade até paralelo.',
             completed: false
         },
         {
-            id: 9,
+            id: 18,
             name: 'Legpress Horizontal',
             series: '4x8-10',
-            load: '120kg',
+            load: '280kg',
             interval: '60s',
-            instructions: 'Pés ligeiramente afastados. Não tranque os joelhos na extensão total.',
+            instructions: 'Pés ligeiramente afastados. Não tranque os joelhos na extensão total. Desça controlado.',
+            completed: false
+        },
+        {
+            id: 19,
+            name: 'Cadeira Adutora',
+            series: '3x12-15',
+            load: '80kg',
+            interval: '45s',
+            instructions: 'Aduto as coxas (puxe as pernas uma em direção à outra). Movimento controlado e completo.',
             completed: false
         }
     ]
