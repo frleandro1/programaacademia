@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'academia_treino';
 const API_URL = 'http://localhost/academia_api.php';
 const USE_DATABASE = false;
+const USE_FIREBASE = true; // Ativar sincronização com Firebase
 
 // Verifica se o usuário está logado
 let USUARIO_ID = 1;
@@ -10,6 +11,10 @@ let CURRENT_USER = null;
 let trainingTimer = null;
 let sessionStartTime = null;
 let sessionElapsedSeconds = 0;
+
+// Firebase
+let db = null;
+let firebaseReady = false;
 
 function checkLogin() {
     const userJson = localStorage.getItem('currentUser');
@@ -33,6 +38,116 @@ function handleLogout() {
         localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
     }
+}
+
+// ============ INICIALIZAÇÃO FIREBASE ============
+
+function initializeFirebase() {
+    if (!USE_FIREBASE) return;
+    
+    try {
+        // Importar e inicializar Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5CPHE4fvlkZYa0KkINr-NlhIMPYs4qAM",
+            authDomain: "academiatreinoapp-d2004.firebaseapp.com",
+            databaseURL: "https://academiatreinoapp-d2004-default-rtdb.firebaseio.com",
+            projectId: "academiatreinoapp-d2004",
+            storageBucket: "academiatreinoapp-d2004.firebasestorage.app",
+            messagingSenderId: "1075985055185",
+            appId: "1:1075985055185:web:bdaf8c84c4778361e974f0",
+            measurementId: "G-8TVK5XD653"
+        };
+
+        // Inicializar Firebase
+        const script = document.createElement('script');
+        script.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        script.onload = () => {
+            const script2 = document.createElement('script');
+            script2.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+            script2.onload = () => {
+                window.firebase = {
+                    app: firebase.initializeApp(firebaseConfig),
+                    db: firebase.database()
+                };
+                db = window.firebase.db;
+                firebaseReady = true;
+                console.log('✅ Firebase iniciado com sucesso!');
+                syncFirebaseData();
+            };
+            document.head.appendChild(script2);
+        };
+        document.head.appendChild(script);
+    } catch (error) {
+        console.warn('⚠️ Firebase não disponível, usando localStorage:', error);
+    }
+}
+
+// Sincronizar dados com Firebase
+function syncFirebaseData() {
+    if (!firebaseReady || !CURRENT_USER) return;
+    
+    const username = CURRENT_USER.name;
+    
+    // Sincronizar treino
+    const training = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    if (Object.keys(training).length > 0) {
+        saveToFirebase(`trainings/${username}`, training);
+    }
+    
+    // Sincronizar customizações
+    const customTraining = JSON.parse(localStorage.getItem(`custom_training_${username}`)) || {};
+    if (Object.keys(customTraining).length > 0) {
+        saveToFirebase(`custom_trainings/${username}`, customTraining);
+    }
+    
+    // Sincronizar sessão
+    const session = JSON.parse(localStorage.getItem(`training_session_${username}`)) || {};
+    if (Object.keys(session).length > 0) {
+        saveToFirebase(`sessions/${username}`, session);
+    }
+    
+    console.log('✅ Dados sincronizados com Firebase!');
+}
+
+// Salvar dados no Firebase
+function saveToFirebase(path, data) {
+    if (!firebaseReady) return;
+    
+    try {
+        const ref = db.ref(path);
+        ref.set(data).then(() => {
+            console.log(`✅ Salvo em Firebase: ${path}`);
+        }).catch(error => {
+            console.error(`❌ Erro ao salvar em Firebase: ${path}`, error);
+        });
+    } catch (error) {
+        console.error('Erro Firebase:', error);
+    }
+}
+
+// Carregar dados do Firebase
+async function loadFromFirebase(path) {
+    if (!firebaseReady) return null;
+    
+    return new Promise((resolve) => {
+        try {
+            const ref = db.ref(path);
+            ref.once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    console.log(`✅ Carregado do Firebase: ${path}`);
+                    resolve(snapshot.val());
+                } else {
+                    resolve(null);
+                }
+            }).catch(error => {
+                console.error(`❌ Erro ao carregar do Firebase: ${path}`, error);
+                resolve(null);
+            });
+        } catch (error) {
+            console.error('Erro Firebase:', error);
+            resolve(null);
+        }
+    });
 }// Lista de vídeos disponíveis na pasta videos/
 const AVAILABLE_VIDEOS = [
     'Agachamento Livre.mp4',
@@ -166,6 +281,7 @@ const DEMO_DATA = {
 
 function init() {
     checkLogin();
+    initializeFirebase();
     initializeDemoData();
     loadTraining();
     startTrainingTimer();
@@ -341,6 +457,10 @@ function saveLoad(exerciseId) {
     
     if (found) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+        // Sincronizar com Firebase
+        if (firebaseReady && CURRENT_USER) {
+            saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+        }
     }
 }
 
@@ -360,6 +480,10 @@ function increaseLoad(exerciseId) {
     
     if (found) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+        // Sincronizar com Firebase
+        if (firebaseReady && CURRENT_USER) {
+            saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+        }
     }
 }
 
@@ -381,6 +505,10 @@ function decreaseLoad(exerciseId) {
     
     if (found) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+        // Sincronizar com Firebase
+        if (firebaseReady && CURRENT_USER) {
+            saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+        }
     }
 }
 
@@ -416,6 +544,11 @@ function toggleComplete(group, id) {
         if (ex) {
             ex.completed = !ex.completed;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+            
+            // Sincronizar com Firebase
+            if (firebaseReady && CURRENT_USER) {
+                saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+            }
             
             // Verifica se todos os exercícios foram concluídos
             checkIfWorkoutComplete(exercises);
@@ -543,6 +676,15 @@ function startTrainingTimer() {
         if (totalSeconds % 5 === 0) {
             sessionData.elapsedSeconds = totalSeconds;
             localStorage.setItem(storageKey, JSON.stringify(sessionData));
+            
+            // Sincroniza com Firebase
+            if (firebaseReady && USE_FIREBASE) {
+                saveToFirebase(`sessions/${CURRENT_USER.name}/current`, {
+                    date: today,
+                    elapsedSeconds: totalSeconds,
+                    timestamp: Date.now()
+                });
+            }
         }
         
         updateTimerDisplay();
@@ -759,6 +901,23 @@ function closeSummary() {
 
 function finishSummary() {
     closeSummary();
+    
+    // Salva a sessão completada no Firebase
+    if (firebaseReady && USE_FIREBASE && CURRENT_USER) {
+        const storageKey = `training_session_${CURRENT_USER.name}`;
+        const sessionData = JSON.parse(localStorage.getItem(storageKey)) || {};
+        
+        // Salva no histórico de sessões
+        const historyKey = `sessions/${CURRENT_USER.name}/${new Date().toISOString().split('T')[0]}`;
+        saveToFirebase(historyKey, {
+            ...sessionData,
+            completedAt: new Date().toISOString(),
+            exercises: JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}
+        });
+        
+        console.log('✅ Treino salvo no Firebase:', historyKey);
+    }
+    
     // Reseta o treino para o próximo dia
     resetAllExercises();
 }
