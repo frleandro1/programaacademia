@@ -3,34 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treino Hoje</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Academia - Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
     <div class="header">
         <div class="header-avatar">👤</div>
         <div class="header-info">
-            <h1>Leandro Barba 051</h1>
-            <p>Rotina: PPL 1 NOVO</p>
-            <p>📌 Redução de gordura/Hipertrofia - Intermediário</p>
+            <h1 id="userName">Leandro Barba 051</h1>
+            <p id="userRoutine">Rotina: PPL 1 NOVO</p>
+            <p id="userGoal">📌 Redução de gordura/Hipertrofia - Intermediário</p>
         </div>
+        <button class="btn-logout" onclick="handleLogout()">🚪 Sair</button>
     </div>
 
     <div class="container">
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Total de Exercícios</h3>
-                <div class="number" id="totalExercises">0</div>
+        <!-- Dashboard Section -->
+        <div class="dashboard">
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="dashboard-icon">💪</div>
+                    <div class="dashboard-content">
+                        <span class="dashboard-label">Total de Exercícios</span>
+                        <span class="dashboard-value" id="totalExercises">0</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="dashboard-icon">✅</div>
+                    <div class="dashboard-content">
+                        <span class="dashboard-label">Concluídos Hoje</span>
+                        <span class="dashboard-value" id="completedExercises">0</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="dashboard-icon">📊</div>
+                    <div class="dashboard-content">
+                        <span class="dashboard-label">Progresso</span>
+                        <span class="dashboard-value" id="progressPercent">0%</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="dashboard-icon">⏱️</div>
+                    <div class="dashboard-content">
+                        <span class="dashboard-label">Tempo Decorrido</span>
+                        <span class="dashboard-value" id="timeElapsed">00:00</span>
+                    </div>
+                </div>
             </div>
-            <div class="stat-card">
-                <h3>Concluídos Hoje</h3>
-                <div class="number" id="completedExercises">0</div>
+
+            <div class="dashboard-actions">
+                <button class="btn-reset" onclick="resetAllExercises()">🔄 Resetar Treino</button>
             </div>
         </div>
 
+        <!-- Exercises Section -->
         <div id="trainingPlan"></div>
     </div>
 
-    <script src="js/main.js?v=3"></script>
+    <script src="js/main.js?v=12"></script>
 </body>
 </html>

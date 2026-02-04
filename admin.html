@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia - Painel Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .tab-btn.active {
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 1em;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            background: #fff9f9;
+        }
+
+        .btn-primary {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #ff5252;
+        }
+
+        .users-list {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .user-item:hover {
+            background: #f9f9f9;
+        }
+
+        .user-item.selected {
+            background: #fff3f3;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .exercise-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .exercise-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .exercise-meta {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .exercise-meta p {
+            margin: 5px 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ff6b6b;
+            padding-bottom: 10px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .training-group {
+            margin-bottom: 25px;
+        }
+
+        .training-group h3 {
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ff6b6b;
+        }
+
+        .training-exercise {
+            background: #f9f9f9;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .exercise-details {
+            flex: 1;
+        }
+
+        .exercise-details p {
+            margin: 3px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        .add-exercise-form {
+            background: #f0f8f4;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .add-exercise-form h4 {
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .exercise-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .exercise-option {
+            padding: 10px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .exercise-option:hover {
+            border-color: #ff6b6b;
+            background: #fff9f9;
+        }
+
+        .exercise-option.selected {
+            border-color: #ff6b6b;
+            background: #fff0f0;
+        }
+
+        .exercise-option h4 {
+            color: #333;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+
+        .exercise-option p {
+            color: #666;
+            font-size: 0.85em;
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔑 Painel de Administração</h1>
+        <button class="btn-logout" onclick="handleAdminLogout()">🚪 Sair</button>
+    </div>
+
+    <div class="container">
+        <!-- Abas -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('usuarios')">👥 Usuários</button>
+            <button class="tab-btn" onclick="switchTab('exercicios')">💪 Exercícios</button>
+            <button class="tab-btn" onclick="switchTab('treinos')">📅 Treinos</button>
+            <button class="tab-btn" onclick="switchTab('historico')">📊 Histórico</button>
+        </div>
+
+        <!-- Tab: Usuários -->
+        <div id="usuarios" class="tab-content active">
+            <h2>Gerenciar Usuários</h2>
+            <button class="btn-primary" onclick="openUserModal()">+ Novo Usuário</button>
+            
+            <div class="success-message" id="successMsg"></div>
+            <div class="error-message" id="errorMsg"></div>
+
+            <div class="users-list" id="usersList"></div>
+        </div>
+
+        <!-- Tab: Exercícios -->
+        <div id="exercicios" class="tab-content">
+            <h2>Gerenciar Exercícios</h2>
+            <button class="btn-primary" onclick="openExerciseModal()">+ Novo Exercício</button>
+            
+            <div class="exercises-grid" id="exercisesList"></div>
+        </div>
+
+        <!-- Tab: Treinos -->
+        <div id="treinos" class="tab-content">
+            <h2>Gerenciar Treinos dos Usuários</h2>
+            <p style="color: #666; margin-bottom: 20px;">Clique em um usuário para editar seu treino.</p>
+            
+            <div class="users-list" id="usersForTraining"></div>
+            <div id="trainingPanel" style="margin-top: 20px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); display: none;"></div>
+        </div>
+
+        <!-- Tab: Histórico -->
+        <div id="historico" class="tab-content">
+            <h2>Histórico de Treinos</h2>
+            <p style="color: #666; margin-bottom: 20px;">Visualize o histórico de treinos de cada usuário.</p>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: 600; color: #333; display: block; margin-bottom: 10px;">Selecione um Usuário:</label>
+                <select id="userHistorySelect" onchange="loadUserHistory(this.value)" style="width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;">
+                    <option value="">-- Selecione um usuário --</option>
+                </select>
+            </div>
+            
+            <div id="historyPanel" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);"></div>
+        </div>
+    </div>
+
+    <!-- Modal Usuário -->
+    <div id="userModal" class="modal">
+        <div class="modal-content" style="position: relative;">
+            <button class="close-modal" onclick="closeUserModal()">×</button>
+            <div class="modal-header">Novo Usuário</div>
+            <form onsubmit="saveUser(event)">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="userName" required>
+                </div>
+                <div class="form-group">
+                    <label>Nome de Usuário</label>
+                    <input type="text" id="userUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="userPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Rotina</label>
+                    <input type="text" id="userRoutine" placeholder="Ex: PPL 1 NOVO">
+                </div>
+                <div class="form-group">
+                    <label>Objetivo</label>
+                    <input type="text" id="userGoal" placeholder="Ex: Ganho de Massa">
+                </div>
+                <button type="submit" class="btn-primary">Salvar Usuário</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Exercício -->
+    <div id="exerciseModal" class="modal">
+        <div class="modal-content" style="position: relative;">
+            <button class="close-modal" onclick="closeExerciseModal()">×</button>
+            <div class="modal-header">Novo Exercício</div>
+            <form onsubmit="saveExercise(event)">
+                <div class="form-group">
+                    <label>Nome do Exercício</label>
+                    <input type="text" id="exerciseName" required>
+                </div>
+                <div class="form-group">
+                    <label>Grupo Muscular</label>
+                    <select id="exerciseGroup" required>
+                        <option value="">Selecione...</option>
+                        <option value="push">Push</option>
+                        <option value="pull">Pull</option>
+                        <option value="legs">Legs</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Séries</label>
+                    <input type="text" id="exerciseSeries" placeholder="Ex: 3x12">
+                </div>
+                <div class="form-group">
+                    <label>Carga</label>
+                    <input type="text" id="exerciseLoad" placeholder="Ex: 10kg">
+                </div>
+                <div class="form-group">
+                    <label>Intervalo</label>
+                    <input type="text" id="exerciseInterval" placeholder="Ex: 50s">
+                </div>
+                <div class="form-group">
+                    <label>Instruções</label>
+                    <textarea id="exerciseInstructions" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Salvar Exercício</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const DEMO_USERS = {
+            'Leandro': {
+                password: '123456',
+                id: 1,
+                name: 'Leandro Barba',
+                routine: 'PPL 1 NOVO',
+                goal: 'Redução de gordura/Hipertrofia - Intermediário'
+            },
+            'João': {
+                password: 'senha123',
+                id: 2,
+                name: 'João Silva',
+                routine: 'Full Body',
+                goal: 'Ganho de Massa'
+            },
+            'Maria': {
+                password: 'senha123',
+                id: 3,
+                name: 'Maria Santos',
+                routine: 'ABCD',
+                goal: 'Ganho de Massa'
+            }
+        };
+
+        let allUsers = { ...DEMO_USERS };
+        let selectedUser = null;
+
+        // Exercícios de demo
+        const DEMO_EXERCISES = {
+            1: { name: 'Supino reto barra', grupo: 'push', series: '3x12', load: '10kg', interval: '50s', instructions: '', id: 1 },
+            2: { name: 'Supino inclinado 30 halteres', grupo: 'push', series: '3x10', load: '10kg', interval: '50s', instructions: '', id: 2 },
+            3: { name: 'Crucifixo polia alta', grupo: 'push', series: '1x25', load: '25kg', interval: '50s', instructions: '', id: 3 },
+            4: { name: 'Desenvolvimento máquina', grupo: 'push', series: '4x12', load: '25kg', interval: '50s', instructions: '', id: 4 },
+            5: { name: 'Tríceps francês barra polia baixa', grupo: 'push', series: '4x12', load: '25kg', interval: '50s', instructions: '', id: 5 },
+            6: { name: 'Puxada frontal aberta', grupo: 'pull', series: '4x8', load: '50kg', interval: '60s', instructions: '', id: 6 },
+            7: { name: 'Rosca em Pé Halteres', grupo: 'pull', series: '3x8', load: '15kg', interval: '60s', instructions: '', id: 7 },
+            8: { name: 'Agachamento Livre', grupo: 'legs', series: '4x8', load: '80kg', interval: '90s', instructions: '', id: 8 },
+            9: { name: 'Legpress Horizontal', grupo: 'legs', series: '4x8', load: '120kg', interval: '60s', instructions: '', id: 9 }
+        };
+
+        function checkAdminLogin() {
+            if (!localStorage.getItem('adminUser')) {
+                window.location.href = 'admin-login.html';
+            }
+        }
+
+        function handleAdminLogout() {
+            if (confirm('Tem certeza que deseja sair?')) {
+                localStorage.removeItem('adminUser');
+                window.location.href = 'admin-login.html';
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'usuarios') loadUsers();
+            if (tabName === 'exercicios') loadExercises();
+            if (tabName === 'treinos') loadUsersForTraining();
+            if (tabName === 'historico') loadHistoricoTab();
+        }
+
+        function loadUsers() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = Object.entries(allUsers).map(([username, user]) => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <h3>${user.name}</h3>
+                        <p>Usuário: ${username}</p>
+                        <p>Rotina: ${user.routine}</p>
+                        <p>Objetivo: ${user.goal}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadExercises() {
+            let exercises = JSON.parse(localStorage.getItem('allExercises'));
+            
+            // Se não houver exercícios, usa os de demo
+            if (!exercises || Object.keys(exercises).length === 0) {
+                exercises = DEMO_EXERCISES;
+                localStorage.setItem('allExercises', JSON.stringify(exercises));
+            }
+            
+            const exercisesList = document.getElementById('exercisesList');
+            
+            if (Object.keys(exercises).length === 0) {
+                exercisesList.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">Nenhum exercício cadastrado ainda.</p>';
+                return;
+            }
+
+            exercisesList.innerHTML = Object.entries(exercises).flatMap(([id, ex]) => `
+                <div class="exercise-card">
+                    <h4>${ex.name}</h4>
+                    <div class="exercise-meta">
+                        <p><strong>Grupo:</strong> ${ex.grupo}</p>
+                        <p><strong>Séries:</strong> ${ex.series}</p>
+                        <p><strong>Carga:</strong> ${ex.load}</p>
+                        <p><strong>Intervalo:</strong> ${ex.interval}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openUserModal() {
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('active');
+            document.getElementById('userName').value = '';
+            document.getElementById('userUsername').value = '';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userRoutine').value = '';
+            document.getElementById('userGoal').value = '';
+        }
+
+        function saveUser(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('userName').value;
+            const username = document.getElementById('userUsername').value;
+            const password = document.getElementById('userPassword').value;
+            const routine = document.getElementById('userRoutine').value;
+            const goal = document.getElementById('userGoal').value;
+
+            if (allUsers[username]) {
+                alert('Este nome de usuário já existe!');
+                return;
+            }
+
+            const newId = Math.max(...Object.values(allUsers).map(u => u.id), 0) + 1;
+            allUsers[username] = { name, password, id: newId, routine, goal };
+
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+
+            showSuccess('Usuário criado com sucesso!');
+            closeUserModal();
+            loadUsers();
+        }
+
+        function openExerciseModal() {
+            document.getElementById('exerciseModal').classList.add('active');
+        }
+
+        function closeExerciseModal() {
+            document.getElementById('exerciseModal').classList.remove('active');
+        }
+
+        function saveExercise(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('exerciseName').value;
+            const grupo = document.getElementById('exerciseGroup').value;
+            const series = document.getElementById('exerciseSeries').value;
+            const load = document.getElementById('exerciseLoad').value;
+            const interval = document.getElementById('exerciseInterval').value;
+            const instructions = document.getElementById('exerciseInstructions').value;
+
+            let exercises = JSON.parse(localStorage.getItem('allExercises')) || {};
+            const newId = Math.max(...Object.keys(exercises).map(Number), 0) + 1;
+
+            exercises[newId] = { name, grupo, series, load, interval, instructions, id: newId };
+            localStorage.setItem('allExercises', JSON.stringify(exercises));
+
+            showSuccess('Exercício criado com sucesso!');
+            closeExerciseModal();
+            loadExercises();
+        }
+
+        function loadUsersForTraining() {
+            const usersList = document.getElementById('usersForTraining');
+            usersList.innerHTML = Object.entries(allUsers).map(([username, user]) => `
+                <div class="user-item" onclick="selectUserForTraining('${username}')">
+                    <div class="user-info">
+                        <h3>${user.name}</h3>
+                        <p>Usuário: ${username}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectUserForTraining(username) {
+            selectedUser = username;
+            document.querySelectorAll('#usersForTraining .user-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            loadUserTraining();
+        }
+
+        function loadUserTraining() {
+            if (!selectedUser) return;
+
+            const panel = document.getElementById('trainingPanel');
+            let allExercises = JSON.parse(localStorage.getItem('allExercises'));
+            
+            // Se não houver exercícios salvos, usa os de demo
+            if (!allExercises || Object.keys(allExercises).length === 0) {
+                allExercises = DEMO_EXERCISES;
+                localStorage.setItem('allExercises', JSON.stringify(DEMO_EXERCISES));
+            }
+            
+            const userTraining = JSON.parse(localStorage.getItem(`training_${selectedUser}`)) || {};
+
+            panel.style.display = 'block';
+
+            let html = `<h3>📅 Treino de ${allUsers[selectedUser].name}</h3>`;
+
+            ['push', 'pull', 'legs'].forEach(grupo => {
+                const groupExercises = Object.entries(allExercises).filter(([id, ex]) => ex.grupo === grupo);
+                const userGroupExercises = userTraining[grupo] || [];
+
+                html += `<div class="training-group">
+                    <h3>${grupo === 'push' ? '💪 Push' : grupo === 'pull' ? '🔙 Pull' : '🦵 Legs'}</h3>`;
+
+                if (userGroupExercises.length > 0) {
+                    html += userGroupExercises.map(exId => {
+                        const ex = allExercises[exId];
+                        if (!ex) return '';
+                        
+                        // Carrega valores customizados ou usa os padrões
+                        let customTraining = JSON.parse(localStorage.getItem(`custom_training_${selectedUser}`)) || {};
+                        let userExerciseData = customTraining[exId] || { series: ex.series, load: ex.load };
+                        
+                        return `
+                            <div class="training-exercise">
+                                <div class="exercise-details">
+                                    <p><strong>${ex.name}</strong></p>
+                                    <div style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                        <div>
+                                            <label style="font-size: 0.9em; color: #666;">Séries/Reps:</label>
+                                            <input type="text" id="series_${exId}" value="${userExerciseData.series}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em;" placeholder="ex: 3x12">
+                                        </div>
+                                        <div>
+                                            <label style="font-size: 0.9em; color: #666;">Carga:</label>
+                                            <input type="text" id="load_${exId}" value="${userExerciseData.load}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em;" placeholder="ex: 10kg">
+                                        </div>
+                                    </div>
+                                    <p style="font-size: 0.85em; color: #999; margin-top: 5px;">Intervalo: ${ex.interval}</p>
+                                </div>
+                                <div style="display: flex; gap: 5px;">
+                                    <button class="btn-primary" onclick="saveExerciseCustomization('${selectedUser}', ${exId}, document.getElementById('series_${exId}').value, document.getElementById('load_${exId}').value)" style="flex: 1; padding: 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">✓ Salvar</button>
+                                    <button class="btn-danger" onclick="removeExerciseFromTraining('${selectedUser}', '${grupo}', ${exId})" style="flex: 1; padding: 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">✕ Remover</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    html += `<p style="color: #999; font-style: italic;">Nenhum exercício atribuído</p>`;
+                }
+
+                // Formulário para adicionar exercícios
+                const availableExercises = groupExercises.filter(([id]) => !userGroupExercises.includes(parseInt(id)));
+                
+                if (availableExercises.length > 0) {
+                    html += `
+                        <div class="add-exercise-form">
+                            <h4>+ Adicionar Exercício</h4>
+                            <div class="exercise-select">
+                                ${availableExercises.map(([id, ex]) => `
+                                    <div class="exercise-option" onclick="addExerciseToTraining('${selectedUser}', '${grupo}', ${id})">
+                                        <h4>${ex.name}</h4>
+                                        <p>Séries: ${ex.series}</p>
+                                        <p>Carga: ${ex.load}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+            });
+
+            panel.innerHTML = html;
+        }
+
+        function addExerciseToTraining(username, grupo, exerciseId) {
+            console.log(`Adding exercise ${exerciseId} to ${username} group ${grupo}`);
+            
+            let userTraining = JSON.parse(localStorage.getItem(`training_${username}`)) || { push: [], pull: [], legs: [] };
+            if (!userTraining[grupo]) userTraining[grupo] = [];
+            
+            const exId = parseInt(exerciseId);
+            if (!userTraining[grupo].includes(exId)) {
+                userTraining[grupo].push(exId);
+                localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
+                console.log('Exercise added. New training:', userTraining);
+                showSuccess('Exercício adicionado com sucesso!');
+                loadUserTraining(); // Recarrega a interface
+            } else {
+                console.log('Exercise already in training');
+            }
+        }
+
+        function saveExerciseCustomization(username, exerciseId, series, load) {
+            console.log(`Saving customization for exercise ${exerciseId}: series=${series}, load=${load}`);
+            
+            let customTraining = JSON.parse(localStorage.getItem(`custom_training_${username}`)) || {};
+            customTraining[exerciseId] = {
+                series: series.trim() || 'N/A',
+                load: load.trim() || 'N/A'
+            };
+            
+            localStorage.setItem(`custom_training_${username}`, JSON.stringify(customTraining));
+            showSuccess('Carga e repetições atualizadas com sucesso!');
+            loadUserTraining();
+        }
+
+        function removeExerciseFromTraining(username, grupo, exerciseId) {
+            if (confirm('Tem certeza que deseja remover este exercício?')) {
+                let userTraining = JSON.parse(localStorage.getItem(`training_${username}`)) || {};
+                if (userTraining[grupo]) {
+                    userTraining[grupo] = userTraining[grupo].filter(id => id !== parseInt(exerciseId));
+                    localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
+                    showSuccess('Exercício removido com sucesso!');
+                    loadUserTraining();
+                }
+            }
+        }
+
+        function updateUserTraining(username, grupo) {
+            const checkboxes = document.querySelectorAll(`input[type="checkbox"][value]`);
+            const selectedExercises = Array.from(document.querySelectorAll(`input[type="checkbox"]:checked`))
+                .filter(cb => {
+                    const ex = JSON.parse(localStorage.getItem('allExercises'))[cb.value];
+                    return ex && ex.grupo === grupo;
+                })
+                .map(cb => parseInt(cb.value));
+
+            let userTraining = JSON.parse(localStorage.getItem(`training_${username}`)) || {};
+            userTraining[grupo] = selectedExercises;
+            localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
+
+            showSuccess('Treino atualizado com sucesso!');
+        }
+
+        function showSuccess(msg) {
+            const successDiv = document.getElementById('successMsg');
+            successDiv.textContent = '✅ ' + msg;
+            successDiv.style.display = 'block';
+            setTimeout(() => successDiv.style.display = 'none', 3000);
+        }
+
+        // ============ FUNÇÕES DE HISTÓRICO ============
+
+        function loadHistoricoTab() {
+            const select = document.getElementById('userHistorySelect');
+            select.innerHTML = '<option value="">-- Selecione um usuário --</option>';
+            
+            Object.entries(allUsers).forEach(([username, user]) => {
+                const option = document.createElement('option');
+                option.value = username;
+                option.textContent = user.name;
+                select.appendChild(option);
+            });
+            
+            document.getElementById('historyPanel').innerHTML = '<p style="color: #999; text-align: center;">Selecione um usuário para visualizar seu histórico</p>';
+        }
+
+        function loadUserHistory(username) {
+            if (!username) {
+                document.getElementById('historyPanel').innerHTML = '<p style="color: #999; text-align: center;">Selecione um usuário para visualizar seu histórico</p>';
+                return;
+            }
+
+            const storageKey = `training_session_${username}`;
+            const sessionData = JSON.parse(localStorage.getItem(storageKey)) || {};
+            const customTraining = JSON.parse(localStorage.getItem(`custom_training_${username}`)) || {};
+            const allExercises = JSON.parse(localStorage.getItem('allExercises')) || DEMO_EXERCISES;
+            
+            // Simula histórico dos últimos 30 dias (base no localStorage atual)
+            const historyPanel = document.getElementById('historyPanel');
+            let html = '';
+            
+            if (!sessionData.date) {
+                historyPanel.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">Nenhum histórico de treino para este usuário</p>';
+                return;
+            }
+
+            // Cria histórico simulado dos últimos 7 dias
+            const trainingHistory = generateTrainingHistory(username, sessionData, customTraining, allExercises);
+            
+            if (trainingHistory.length === 0) {
+                historyPanel.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">Nenhum histórico de treino para este usuário</p>';
+                return;
+            }
+
+            html = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+            `;
+
+            trainingHistory.forEach(entry => {
+                html += `
+                    <div style="background: #f8f9fa; border-left: 4px solid #667eea; padding: 15px; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h4 style="margin: 0; color: #333;">${entry.date}</h4>
+                            <span style="background: #667eea; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">✓ Concluído</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                            <div style="background: white; padding: 10px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 0.85em; color: #666; margin-bottom: 5px;">⏱️ Tempo</div>
+                                <div style="font-size: 1.3em; font-weight: 700; color: #333; font-family: monospace;">${entry.time}</div>
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 0.85em; color: #666; margin-bottom: 5px;">💪 Exercícios</div>
+                                <div style="font-size: 1.3em; font-weight: 700; color: #333;">${entry.exercises}</div>
+                            </div>
+                        </div>
+                        <div style="background: white; padding: 10px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 0.85em; color: #666; margin-bottom: 5px;">🏋️ Carga Total</div>
+                            <div style="font-size: 1.2em; font-weight: 700; color: #667eea;">${entry.load}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            historyPanel.innerHTML = html;
+        }
+
+        function generateTrainingHistory(username, sessionData, customTraining, allExercises) {
+            const history = [];
+            const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+            
+            // Cria entrada do dia atual se houver dados
+            if (sessionData.date && sessionData.elapsedSeconds > 0) {
+                const stats = calculateTrainingStats(exercises, customTraining);
+                history.push({
+                    date: new Date(sessionData.date).toLocaleDateString('pt-BR', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    }).replace(/^\w/, (c) => c.toUpperCase()),
+                    time: formatTime(sessionData.elapsedSeconds),
+                    exercises: stats.totalExercises,
+                    load: stats.totalLoad
+                });
+            }
+
+            // Simula dados dos dias anteriores (apenas para visualização)
+            const daysToSimulate = 6;
+            for (let i = 1; i < daysToSimulate; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                
+                // Simula treinos aleatoriamente para os últimos dias
+                if (Math.random() > 0.3) {
+                    history.push({
+                        date: date.toLocaleDateString('pt-BR', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }).replace(/^\w/, (c) => c.toUpperCase()),
+                        time: `${String(Math.floor(Math.random() * 2)).padStart(2, '0')}:${String(Math.floor(Math.random() * 59) + 1).padStart(2, '0')}:${String(Math.floor(Math.random() * 59)).padStart(2, '0')}`,
+                        exercises: Math.floor(Math.random() * 5) + 7,
+                        load: `${Math.floor(Math.random() * 300) + 200} kg`
+                    });
+                }
+            }
+
+            return history;
+        }
+
+        function calculateTrainingStats(exercises, customTraining) {
+            let totalExercises = 0;
+            let totalLoadValue = 0;
+            
+            Object.keys(exercises).forEach(group => {
+                if (Array.isArray(exercises[group])) {
+                    exercises[group].forEach(ex => {
+                        if (ex.completed) {
+                            totalExercises++;
+                            
+                            const customLoad = customTraining[ex.id]?.load || ex.load || '0kg';
+                            const loadMatch = customLoad.match(/(\d+(?:\.\d+)?)/);
+                            if (loadMatch) {
+                                totalLoadValue += parseFloat(loadMatch[1]);
+                            }
+                        }
+                    });
+                }
+            });
+            
+            return {
+                totalExercises: totalExercises,
+                totalLoad: `${Math.round(totalLoadValue)} kg`
+            };
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        window.addEventListener('load', () => {
+            checkAdminLogin();
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

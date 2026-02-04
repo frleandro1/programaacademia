@@ -1,0 +1,29 @@
+# Instruções do Projeto - GitHub Copilot
+
+Este arquivo fornece contexto para o GitHub Copilot entender melhor seu projeto.
+
+## Informações Básicas
+- **Projeto**: Sistema de Gerenciamento de Treinos de Academia
+- **Stack**: HTML5/CSS3/JavaScript + PHP/MySQL (opcional)
+- **Status**: Em desenvolvimento ativo
+
+## Arquitetura
+- Frontend: Vanilla JavaScript (sem frameworks)
+- Backend: localStorage (fallback para API PHP)
+- Base de dados: MySQL via XAMPP
+- Estrutura: Usuários → Admin → Treino → Histórico
+
+## Tipos de Requisições Esperadas
+1. **Novas funcionalidades**: "Crie uma função que..."
+2. **Correção de bugs**: "Corrija o erro em..."
+3. **Refatoração**: "Refatore o código para..."
+4. **Documentação**: "Documente a função X"
+5. **Performance**: "Otimize a função X"
+
+## Arquivo Principal
+- `js/main.js` - 500+ linhas com lógica principal
+- `admin.html` - 850+ linhas com painel admin
+- `index.html` - Dashboard do usuário
+
+## Para Mais Informações
+Consulte `.copilot-instructions.md` na raiz do projeto

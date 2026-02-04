@@ -1,132 +1,224 @@
 const STORAGE_KEY = 'academia_treino';
+const API_URL = 'http://localhost/academia_api.php';
+const USE_DATABASE = false;
 
-// Mapa de imagens dos exercícios (URLs reais de exercícios)
-const exerciseImages = {
-    'Supino Reto Máquina': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200&h=240&fit=crop&q=80',
-    'Supino Inclinado com Halteres': 'https://images.unsplash.com/photo-1587280591945-5e343bbbd32e?w=200&h=240&fit=crop&q=80',
-    'Crucifixo na Polia Média': 'https://images.unsplash.com/photo-1581009146989-51e4b8b62149?w=200&h=240&fit=crop&q=80',
-    'Desenvolvimento Máquina (Pegada Neutra)': 'https://images.unsplash.com/photo-1599058917212-d217cde29513?w=200&h=240&fit=crop&q=80',
-    'Tríceps Francês na Polia com Corda': 'https://images.unsplash.com/photo-1581472723943-487a5cea902f?w=200&h=240&fit=crop&q=80',
-    'Puxada Frontal': 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=200&h=240&fit=crop&q=80',
-    'Rosca Direta': 'https://images.unsplash.com/photo-1574955957338-cbf3b2b6265f?w=200&h=240&fit=crop&q=80',
-    'Agachamento': 'https://images.unsplash.com/photo-1574287851041-d80bf19a6222?w=200&h=240&fit=crop&q=80',
-    'Leg Press': 'https://images.unsplash.com/photo-1598971457318-b3d1e678e292?w=200&h=240&fit=crop&q=80'
-};
+// Verifica se o usuário está logado
+let USUARIO_ID = 1;
+let CURRENT_USER = null;
+
+// Variáveis de controle do timer
+let trainingTimer = null;
+let sessionStartTime = null;
+let sessionElapsedSeconds = 0;
+
+function checkLogin() {
+    const userJson = localStorage.getItem('currentUser');
+    if (!userJson) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    CURRENT_USER = JSON.parse(userJson);
+    USUARIO_ID = CURRENT_USER.id;
+    
+    // Atualiza informações do usuário na página
+    document.getElementById('userName').textContent = CURRENT_USER.name;
+    document.getElementById('userRoutine').textContent = `Rotina: ${CURRENT_USER.routine}`;
+    document.getElementById('userGoal').textContent = `📌 ${CURRENT_USER.goal}`;
+}
+
+function handleLogout() {
+    if (confirm('Tem certeza que deseja sair?')) {
+        stopTrainingTimer();
+        localStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+    }
+}// Lista de vídeos disponíveis na pasta videos/
+const AVAILABLE_VIDEOS = [
+    'Agachamento Livre.mp4',
+    'Crucifixo polia alta.mp4',
+    'Desenvolvimento máquina.mp4',
+    'Legpress Horizontal.mp4',
+    'Puxada frontal aberta.mp4',
+    'Rosca em Pé Halteres.mp4',
+    'Supino inclinado 30 halteres.mp4',
+    'Supino reto barra.mp4',
+    'Tríceps francês barra polia baixa.mp4'
+];
+
+// Função para encontrar o vídeo correspondente ao exercício
+function findVideoForExercise(exerciseName) {
+    if (!exerciseName) return null;
+    
+    const nameNormalized = exerciseName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
+    for (const video of AVAILABLE_VIDEOS) {
+        const videoNormalized = video.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        
+        // Verifica se o nome do exercício está contido no nome do vídeo
+        if (videoNormalized.includes(nameNormalized) || nameNormalized.includes(videoNormalized)) {
+            return `./videos/${video}`;
+        }
+    }
+    
+    return null;
+}
+
+// Função para extrair ID do YouTube e gerar URL da miniatura
+function getYoutubeThumb(url) {
+    if (!url) return null;
+    
+    // Se for vídeo local, retorna o próprio caminho do vídeo para usar como poster
+    if (url.startsWith('./videos/')) {
+        return url;
+    }
+}
 
 const DEMO_DATA = {
     push: [
         {
             id: 1,
-            name: 'Supino Reto Máquina',
+            name: 'Supino reto barra',
             series: '3x12 drop set',
             load: '10-15',
             interval: '50s',
             instructions: '+3 séries normais (10-12 repetições), na última série + drop set, Reduz 30% da carga + continua até a falha, Reduz mais 30% + continua até a falha',
-            image: exerciseImages['Supino Reto Máquina'],
-            videoUrl: 'https://www.youtube.com/shorts/UHa9U-O09_U',
             completed: false
         },
         {
             id: 2,
-            name: 'Supino Inclinado com Halteres',
+            name: 'Supino inclinado 30 halteres',
             series: '3x10/10/6',
             load: '10-15',
             interval: '50s',
             instructions: '+3 blocos: 1ª vez: 10 repetições (mesma carga), 2ª vez: 10 repetições (com carga maior, cerca de +20%), 3ª vez: 6 repetições (com carga maior, cerca de +20%)',
-            image: exerciseImages['Supino Inclinado com Halteres'],
             completed: false
         },
         {
             id: 3,
-            name: 'Crucifixo na Polia Média',
+            name: 'Crucifixo polia alta',
             series: '1x25',
             load: '25kg',
             interval: '50s',
             instructions: '1 série só, com 20-25 repetições contínuas, carga leve-moderada, foco em alongar e contrair bem o peitoral.',
-            image: exerciseImages['Crucifixo na Polia Média'],
             completed: false
         },
         {
             id: 4,
-            name: 'Desenvolvimento Máquina (Pegada Neutra)',
+            name: 'Desenvolvimento máquina',
             series: '4x12',
             load: '25kg',
             interval: '50s',
             instructions: 'Suba os halteres acima da cabeça com controle.',
-            image: exerciseImages['Desenvolvimento Máquina (Pegada Neutra)'],
             completed: false
         },
         {
             id: 5,
-            name: 'Tríceps Francês na Polia com Corda',
+            name: 'Tríceps francês barra polia baixa',
             series: '4x12',
             load: '25kg',
             interval: '50s',
             instructions: 'Cotovelos fixos. Estenda completamente os braços no final.',
-            image: exerciseImages['Tríceps Francês na Polia com Corda'],
             completed: false
         }
     ],
     pull: [
         {
             id: 6,
-            name: 'Puxada Frontal',
+            name: 'Puxada frontal aberta',
             series: '4x8-10',
             load: '50kg',
             interval: '60s',
             instructions: 'Puxe até o peito. Mantenha o peito erguido e puxe com a escápula.',
-            image: exerciseImages['Puxada Frontal'],
             completed: false
         },
         {
             id: 7,
-            name: 'Rosca Direta',
+            name: 'Rosca em Pé Halteres',
             series: '3x8-10',
             load: '15kg',
             interval: '60s',
             instructions: 'Cotovelos fixos na lateral. Movimento só do antebraço.',
-            image: exerciseImages['Rosca Direta'],
             completed: false
         }
     ],
     legs: [
         {
             id: 8,
-            name: 'Agachamento',
+            name: 'Agachamento Livre',
             series: '4x8-10',
             load: '80kg',
             interval: '90s',
             instructions: 'Joelhos acompanham a direção dos pés. Peito para cima durante todo o movimento.',
-            image: exerciseImages['Agachamento'],
             completed: false
         },
         {
             id: 9,
-            name: 'Leg Press',
+            name: 'Legpress Horizontal',
             series: '4x8-10',
             load: '120kg',
             interval: '60s',
             instructions: 'Pés ligeiramente afastados. Não tranque os joelhos na extensão total.',
-            image: exerciseImages['Leg Press'],
             completed: false
         }
     ]
 };
 
 function init() {
+    checkLogin();
     initializeDemoData();
     loadTraining();
+    startTrainingTimer();
 }
 
-function initializeDemoData() {
-    const existing = localStorage.getItem(STORAGE_KEY);
-    if (!existing) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO_DATA));
+async function initializeDemoData() {
+    if (!USE_DATABASE) {
+        const existing = localStorage.getItem(STORAGE_KEY);
+        if (!existing) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO_DATA));
+        }
     }
 }
 
-function loadTraining() {
-    const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+async function loadTraining() {
+    let exercises;
+    
+    if (USE_DATABASE) {
+        try {
+            const response = await fetch(`${API_URL}?action=listar&usuario_id=${USUARIO_ID}`);
+            const data = await response.json();
+            
+            if (data.sucesso) {
+                exercises = organizarExerciciosPorGrupo(data.exercicios);
+            } else {
+                console.error('Erro ao carregar exercícios:', data.error);
+                exercises = DEMO_DATA;
+            }
+        } catch (error) {
+            console.error('Erro na conexão com API:', error);
+            exercises = DEMO_DATA;
+        }
+    } else {
+        exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+    }
+    
+    renderizarTreino(exercises);
+}
+
+function organizarExerciciosPorGrupo(exercicios) {
+    const grupos = { push: [], pull: [], legs: [] };
+    
+    exercicios.forEach(ex => {
+        ex.completed = false; // Será atualizado pelo histórico
+        if (grupos[ex.grupo]) {
+            grupos[ex.grupo].push(ex);
+        }
+    });
+    
+    return grupos;
+}
+
+function renderizarTreino(exercises) {
     const plan = document.getElementById('trainingPlan');
     
     let html = '';
@@ -148,9 +240,32 @@ function loadTraining() {
                 totalExercises++;
                 if (ex.completed) completedExercises++;
 
-                const imageHtml = ex.image 
-                    ? `<img src="${ex.image}" alt="${ex.name}">`
-                    : `<div class="no-image">💪</div>`;
+                // Carrega personalizações customizadas do admin
+                let customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.name}`)) || {};
+                let displaySeries = customTraining[ex.id] ? customTraining[ex.id].series : ex.series;
+                let displayLoad = customTraining[ex.id] ? customTraining[ex.id].load : ex.load;
+
+                // Busca o vídeo dinamicamente baseado no nome do exercício
+                const videoUrl = findVideoForExercise(ex.name);
+                const thumbUrl = getYoutubeThumb(videoUrl);
+                
+                let imageHtml;
+                
+                if (thumbUrl && thumbUrl.startsWith('./videos/')) {
+                    // Para vídeos locais, renderiza um vídeo HTML5 com controles
+                    imageHtml = `
+                        <video width="100%" height="100%" style="border-radius: 8px; object-fit: cover;" controls>
+                            <source src="${thumbUrl}" type="video/mp4">
+                            💪
+                        </video>
+                    `;
+                } else if (thumbUrl) {
+                    // Para YouTube, usa imagem
+                    imageHtml = `<img src="${thumbUrl}" alt="${ex.name}">`;
+                } else {
+                    // Fallback
+                    imageHtml = `<div class="no-image">💪</div>`;
+                }
 
                 html += `
                     <div class="exercise-card ${ex.completed ? 'completed' : ''}">
@@ -162,12 +277,15 @@ function loadTraining() {
                             <div class="exercise-meta">
                                 <div class="meta-item">
                                     <span class="meta-label">Séries</span>
-                                    <span class="meta-value">${escapeHtml(ex.series)}</span>
+                                    <span class="meta-value">${escapeHtml(displaySeries)}</span>
                                 </div>
-                                ${ex.load ? `
+                                ${displayLoad ? `
                                     <div class="meta-item">
                                         <span class="meta-label">Carga</span>
-                                        <span class="meta-value">${escapeHtml(ex.load)}</span>
+                                        <div class="load-wrapper">
+                                            <input type="text" class="load-input" id="load-${ex.id}" value="${escapeHtml(displayLoad)}" onblur="saveLoad(${ex.id})" placeholder="ex: 10kg">
+                                            <span class="edit-icon">✏️</span>
+                                        </div>
                                     </div>
                                 ` : ''}
                                 ${ex.interval ? `
@@ -179,7 +297,7 @@ function loadTraining() {
                             </div>
                             ${ex.instructions ? `<div class="exercise-instructions">${escapeHtml(ex.instructions)}</div>` : ''}
                             <div class="action-buttons">
-                                <button class="btn-video" onclick="window.open('${ex.videoUrl ? ex.videoUrl : 'https://www.youtube.com/results?search_query=' + encodeURIComponent('${escapeHtml(ex.name)}')}', '_blank')">📹 Ver Vídeo</button>
+                                ${videoUrl ? `<button class="btn-video" onclick="showVideoModal('${videoUrl.replace(/'/g, "\\'")}')">📹 Ver Vídeo</button>` : '<button class="btn-video" disabled style="opacity: 0.5; cursor: not-allowed;">📹 Vídeo não encontrado</button>'}
                             </div>
                         </div>
                         <div class="exercise-image">${imageHtml}</div>
@@ -198,21 +316,448 @@ function loadTraining() {
     plan.innerHTML = html;
     document.getElementById('totalExercises').textContent = totalExercises;
     document.getElementById('completedExercises').textContent = completedExercises;
+    
+    // Calcular progresso
+    const progressPercent = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
+    document.getElementById('progressPercent').textContent = progressPercent + '%';
+}
+
+function saveLoad(exerciseId) {
+    const loadInput = document.getElementById(`load-${exerciseId}`);
+    const newLoad = loadInput.value;
+    const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+    let found = false;
+    
+    Object.keys(exercises).forEach(group => {
+        const ex = exercises[group].find(e => e.id === exerciseId);
+        if (ex) {
+            ex.load = newLoad;
+            found = true;
+        }
+    });
+    
+    if (found) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+    }
+}
+
+function increaseLoad(exerciseId) {
+    const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+    let found = false;
+    
+    Object.keys(exercises).forEach(group => {
+        const ex = exercises[group].find(e => e.id === exerciseId);
+        if (ex) {
+            const currentLoad = parseFloat(ex.load) || 0;
+            ex.load = (currentLoad + 1) + 'kg';
+            document.getElementById(`load-${exerciseId}`).textContent = ex.load;
+            found = true;
+        }
+    });
+    
+    if (found) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+    }
+}
+
+function decreaseLoad(exerciseId) {
+    const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+    let found = false;
+    
+    Object.keys(exercises).forEach(group => {
+        const ex = exercises[group].find(e => e.id === exerciseId);
+        if (ex) {
+            const currentLoad = parseFloat(ex.load) || 0;
+            if (currentLoad > 0) {
+                ex.load = (currentLoad - 1) + 'kg';
+                document.getElementById(`load-${exerciseId}`).textContent = ex.load;
+                found = true;
+            }
+        }
+    });
+    
+    if (found) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+    }
 }
 
 function toggleComplete(group, id) {
     const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-    const ex = exercises[group].find(e => e.id === id);
-    if (ex) {
-        ex.completed = !ex.completed;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
-        loadTraining();
+    if (USE_DATABASE) {
+        const completed = event.target.checked;
+        
+        fetch(`${API_URL}?action=completar&usuario_id=${USUARIO_ID}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                usuario_id: USUARIO_ID,
+                exercicio_id: id,
+                completado: completed ? 1 : 0
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                loadTraining();
+            } else {
+                console.error('Erro ao atualizar exercício:', data.erro);
+                loadTraining();
+            }
+        })
+        .catch(error => console.error('Erro:', error));
+    } else {
+        const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        const ex = exercises[group].find(e => e.id === id);
+        if (ex) {
+            ex.completed = !ex.completed;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+            
+            // Verifica se todos os exercícios foram concluídos
+            checkIfWorkoutComplete(exercises);
+            
+            loadTraining();
+        }
+    }
+}
+
+function resetAllExercises() {
+    if (confirm('Tem certeza que deseja resetar todos os exercícios? ⚠️')) {
+        if (USE_DATABASE) {
+            fetch(`${API_URL}?action=resetar&usuario_id=${USUARIO_ID}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ usuario_id: USUARIO_ID })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    loadTraining();
+                } else {
+                    console.error('Erro ao resetar:', data.erro);
+                }
+            })
+            .catch(error => console.error('Erro:', error));
+        } else {
+            const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+            Object.keys(exercises).forEach(group => {
+                exercises[group].forEach(ex => {
+                    ex.completed = false;
+                });
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+            loadTraining();
+        }
     }
 }
 
 function escapeHtml(text) {
     const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
     return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Modal para vídeos locais
+function showVideoModal(videoPath) {
+    if (!videoPath) return;
+    
+    const modal = document.createElement('div');
+    modal.id = 'videoModal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="position: relative; width: 90%; max-width: 800px;">
+            <button onclick="document.getElementById('videoModal').remove()" style="
+                position: absolute;
+                top: -40px;
+                right: 0;
+                background: white;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                font-size: 24px;
+                cursor: pointer;
+                z-index: 1001;
+            ">✕</button>
+            <video width="100%" height="auto" controls autoplay style="border-radius: 8px; max-height: 80vh;">
+                <source src="${videoPath}" type="video/mp4">
+                Seu navegador não suporta vídeo HTML5.
+            </video>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+    };
+}
+
+// ============ FUNÇÕES DE TIMER DE TREINO ============
+
+function startTrainingTimer() {
+    const storageKey = `training_session_${CURRENT_USER.name}`;
+    const today = new Date().toDateString();
+    
+    // Verifica se já existe uma sessão hoje
+    let sessionData = JSON.parse(localStorage.getItem(storageKey)) || {};
+    
+    if (sessionData.date !== today) {
+        // Nova sessão do dia
+        sessionData = {
+            date: today,
+            startTime: Date.now(),
+            elapsedSeconds: 0
+        };
+    } else {
+        // Sessão continua do mesmo dia
+        sessionStartTime = sessionData.startTime;
+        sessionElapsedSeconds = sessionData.elapsedSeconds;
+    }
+    
+    // Inicia o timer que atualiza a cada segundo
+    updateTimerDisplay();
+    
+    trainingTimer = setInterval(() => {
+        const now = Date.now();
+        const totalSeconds = Math.floor((now - sessionData.startTime) / 1000) + sessionData.elapsedSeconds;
+        sessionElapsedSeconds = totalSeconds;
+        
+        // Salva o progresso a cada 5 segundos
+        if (totalSeconds % 5 === 0) {
+            sessionData.elapsedSeconds = totalSeconds;
+            localStorage.setItem(storageKey, JSON.stringify(sessionData));
+        }
+        
+        updateTimerDisplay();
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const hours = Math.floor(sessionElapsedSeconds / 3600);
+    const minutes = Math.floor((sessionElapsedSeconds % 3600) / 60);
+    const seconds = sessionElapsedSeconds % 60;
+    
+    const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    
+    const timeElement = document.getElementById('timeElapsed');
+    if (timeElement) {
+        timeElement.textContent = timeString;
+    }
+}
+
+function stopTrainingTimer() {
+    if (trainingTimer) {
+        clearInterval(trainingTimer);
+        trainingTimer = null;
+    }
+}
+
+// ============ FUNÇÕES DE CONCLUSÃO DE TREINO ============
+
+function checkIfWorkoutComplete(exercises) {
+    // Conta total e concluídos
+    let totalExercises = 0;
+    let completedExercises = 0;
+    
+    Object.keys(exercises).forEach(group => {
+        if (Array.isArray(exercises[group])) {
+            exercises[group].forEach(ex => {
+                totalExercises++;
+                if (ex.completed) completedExercises++;
+            });
+        }
+    });
+    
+    // Se todos os exercícios foram concluídos
+    if (totalExercises > 0 && completedExercises === totalExercises) {
+        setTimeout(() => {
+            showWorkoutSummary();
+        }, 500);
+    }
+}
+
+function showWorkoutSummary() {
+    const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    const customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.name}`)) || {};
+    
+    // Calcula dados do treino
+    const trainingStats = calculateTrainingStats(exercises, customTraining);
+    const weekStats = getWeekTrainingStats();
+    
+    const summaryHtml = `
+        <div class="workout-summary-modal">
+            <div class="workout-summary-content">
+                <button class="close-summary" onclick="closeSummary()">✕</button>
+                
+                <div class="summary-header">
+                    <h1>🎉 Parabéns!</h1>
+                    <p>Treino Concluído com Sucesso</p>
+                </div>
+                
+                <div class="summary-body">
+                    <div class="summary-section">
+                        <h2>📊 Resumo de Hoje</h2>
+                        <div class="summary-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Exercícios</span>
+                                    <span class="stat-value">${trainingStats.totalExercises}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="stat-icon">⏱️</div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Tempo Total</span>
+                                    <span class="stat-value">${trainingStats.time}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="stat-icon">🏋️</div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Carga Total</span>
+                                    <span class="stat-value">${trainingStats.totalLoad}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h2>📅 Esta Semana</h2>
+                        <div class="week-stats">
+                            <div class="week-badge">
+                                <span class="week-number">${weekStats.trainingDays}</span>
+                                <span class="week-label">Dias de Treino</span>
+                            </div>
+                            <div class="week-chart">
+                                ${generateWeekChart(weekStats.dailyTrainings)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-actions">
+                        <button class="btn-finish" onclick="finishSummary()">Finalizar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove modal anterior se existir
+    const oldModal = document.querySelector('.workout-summary-modal');
+    if (oldModal) oldModal.remove();
+    
+    document.body.innerHTML += summaryHtml;
+}
+
+function calculateTrainingStats(exercises, customTraining) {
+    let totalExercises = 0;
+    let totalLoadValue = 0;
+    let totalLoadUnit = 'kg';
+    
+    Object.keys(exercises).forEach(group => {
+        if (Array.isArray(exercises[group])) {
+            exercises[group].forEach(ex => {
+                if (ex.completed) {
+                    totalExercises++;
+                    
+                    // Extrai carga customizada ou padrão
+                    const customLoad = customTraining[ex.id]?.load || ex.load || '0kg';
+                    const loadMatch = customLoad.match(/(\d+(?:\.\d+)?)/);
+                    if (loadMatch) {
+                        totalLoadValue += parseFloat(loadMatch[1]);
+                    }
+                }
+            });
+        }
+    });
+    
+    const hours = Math.floor(sessionElapsedSeconds / 3600);
+    const minutes = Math.floor((sessionElapsedSeconds % 3600) / 60);
+    
+    return {
+        totalExercises: totalExercises,
+        time: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`,
+        totalLoad: `${Math.round(totalLoadValue)} ${totalLoadUnit}`
+    };
+}
+
+function getWeekTrainingStats() {
+    const storageKey = `training_session_${CURRENT_USER.name}`;
+    const today = new Date();
+    const weekDays = {};
+    let trainingDays = 0;
+    
+    // Verifica últimos 7 dias
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toDateString();
+        
+        const session = JSON.parse(localStorage.getItem(storageKey));
+        if (session && session.date === dateStr && session.elapsedSeconds > 0) {
+            weekDays[i] = true;
+            trainingDays++;
+        } else {
+            weekDays[i] = false;
+        }
+    }
+    
+    return {
+        trainingDays: trainingDays,
+        dailyTrainings: weekDays
+    };
+}
+
+function generateWeekChart(dailyTrainings) {
+    const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+    const today = new Date().getDay();
+    
+    let chart = '<div class="week-day-chart">';
+    
+    // Mostra os últimos 7 dias na ordem inversa
+    for (let i = 6; i >= 0; i--) {
+        const hasTraining = dailyTrainings[i];
+        const dayIndex = (today - (6 - i) + 7) % 7;
+        const dayName = days[dayIndex];
+        
+        chart += `
+            <div class="day-bar ${hasTraining ? 'trained' : ''}">
+                <div class="bar-fill"></div>
+                <span class="day-label">${dayName}</span>
+            </div>
+        `;
+    }
+    
+    chart += '</div>';
+    return chart;
+}
+
+function closeSummary() {
+    const modal = document.querySelector('.workout-summary-modal');
+    if (modal) modal.remove();
+}
+
+function finishSummary() {
+    closeSummary();
+    // Reseta o treino para o próximo dia
+    resetAllExercises();
 }
 
 window.addEventListener('load', init);

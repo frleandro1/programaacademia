@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a3a52 0%, #2c5aa0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .login-header h1 {
+            color: #1a3a52;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #1a3a52;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            background: #f0f8f4;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #2c5aa0 0%, #1a3a52 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(44, 90, 160, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            background: #ffe0e0;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            border-left: 4px solid #ff6b6b;
+            display: none;
+        }
+
+        .demo-users {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 0.85em;
+            color: #666;
+            border-left: 4px solid #2c5aa0;
+        }
+
+        .demo-users strong {
+            color: #1a3a52;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-icon">💪</div>
+            <h1>Academia</h1>
+            <p>Sistema de Treino</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Nome de Usuário</label>
+                <input type="text" id="username" placeholder="Ex: Leandro" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="Digite sua senha" required>
+            </div>
+
+            <button type="submit" class="btn-login">Entrar</button>
+        </form>
+
+        <div class="demo-users">
+            <strong>Demo:</strong><br>
+            Usuário: <code>Leandro</code><br>
+            Senha: <code>123456</code>
+        </div>
+
+        <div class="demo-users" style="margin-top: 20px; background: #fff3cd; border-left-color: #ffc107;">
+            <strong>👤 Admin?</strong><br>
+            <a href="admin-login.html" style="color: #ffc107; text-decoration: none; font-weight: 600;">Acessar Painel de Administração →</a>
+        </div>
+    </div>
+
+    <script>
+        const USERS = {
+            'Leandro': {
+                password: '123456',
+                id: 1,
+                name: 'Leandro Barba',
+                routine: 'PPL 1 NOVO',
+                goal: 'Redução de gordura/Hipertrofia - Intermediário'
+            },
+            'João': {
+                password: 'senha123',
+                id: 2,
+                name: 'João Silva',
+                routine: 'Full Body',
+                goal: 'Ganho de Massa'
+            },
+            'Maria': {
+                password: 'senha123',
+                id: 3,
+                name: 'Maria Santos',
+                routine: 'ABCD',
+                goal: 'Ganho de Massa'
+            }
+        };
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+
+            const user = USERS[username];
+            
+            if (!user || user.password !== password) {
+                errorDiv.textContent = '❌ Usuário ou senha incorretos!';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Salva informações do usuário
+            localStorage.setItem('currentUser', JSON.stringify({
+                id: user.id,
+                username: username,
+                name: user.name,
+                routine: user.routine,
+                goal: user.goal
+            }));
+
+            // Redireciona para o dashboard
+            window.location.href = 'index.html';
+        }
+
+        // Se já está logado, redireciona para dashboard
+        window.addEventListener('load', () => {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
