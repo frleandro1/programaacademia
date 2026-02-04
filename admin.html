@@ -1479,7 +1479,14 @@
             saveCustomTrainingToFirebase(selectedUser, customTraining);
 
             showSuccess(`✅ Treino salvo com ${exercisesAdded} exercício(s)!`);
-            loadUserTraining(); // Recarrega a interface
+            
+            // Voltar ao início após 2 segundos
+            setTimeout(() => {
+                selectedUser = null;
+                document.getElementById('trainingPanel').style.display = 'none';
+                document.getElementById('trainingPanel').innerHTML = '';
+                loadUsers(); // Recarrega a lista de usuários
+            }, 2000);
         }
 
         function removeExerciseFromTraining(username, grupo, exerciseId) {
