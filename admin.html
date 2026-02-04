@@ -377,7 +377,12 @@
         <!-- Tab: Usuários -->
         <div id="usuarios" class="tab-content active">
             <h2>Gerenciar Usuários</h2>
-            <button class="btn-primary" onclick="openUserModal()">+ Novo Usuário</button>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="btn-primary" onclick="openUserModal()">+ Novo Usuário</button>
+                <button class="btn-secondary" onclick="syncAllUsersToFirebase()" style="background: #4CAF50;">
+                    🔄 Sincronizar Firebase
+                </button>
+            </div>
             
             <div class="success-message" id="successMsg"></div>
             <div class="error-message" id="errorMsg"></div>
@@ -549,6 +554,55 @@
             if (!localStorage.getItem('adminUser')) {
                 window.location.href = 'admin-login.html';
             }
+            
+            // Inicializar Firebase para o painel admin
+            initializeFirebaseAdmin();
+        }
+
+        // Variáveis globais para Firebase
+        let db = null;
+        let firebaseReady = false;
+
+        // Inicializar Firebase no admin
+        function initializeFirebaseAdmin() {
+            try {
+                // Carregar Firebase dinamicamente
+                const script = document.createElement('script');
+                script.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+                script.onload = () => {
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+                    script2.onload = () => {
+                        initializeFirebaseConfig();
+                    };
+                    document.head.appendChild(script2);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.warn('⚠️ Firebase não disponível:', error);
+            }
+        }
+
+        function initializeFirebaseConfig() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyB5CPHE4fvlkZYa0KkINr-NlhIMPYs4qAM",
+                    authDomain: "academiatreinoapp-d2004.firebaseapp.com",
+                    databaseURL: "https://academiatreinoapp-d2004-default-rtdb.firebaseio.com",
+                    projectId: "academiatreinoapp-d2004",
+                    storageBucket: "academiatreinoapp-d2004.firebasestorage.app",
+                    messagingSenderId: "1075985055185",
+                    appId: "1:1075985055185:web:bdaf8c84c4778361e974f0",
+                    measurementId: "G-8TVK5XD653"
+                };
+
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                firebaseReady = true;
+                console.log('✅ Firebase inicializado no painel admin!');
+            } catch (error) {
+                console.warn('⚠️ Erro ao inicializar Firebase:', error);
+            }
         }
 
         function handleAdminLogout() {
@@ -681,13 +735,56 @@
             }
 
             const newId = Math.max(...Object.values(allUsers).map(u => u.id), 0) + 1;
-            allUsers[username] = { name, password, id: newId, routine, goal };
+            const newUser = { name, password, id: newId, routine, goal };
+            allUsers[username] = newUser;
 
+            // Salvar no localStorage
             localStorage.setItem('allUsers', JSON.stringify(allUsers));
+            
+            // Salvar no Firebase
+            saveUserToFirebase(username, newUser);
 
-            showSuccess('Usuário criado com sucesso!');
+            showSuccess('✅ Usuário criado com sucesso! (salvo localmente e em nuvem)');
             closeUserModal();
             loadUsers();
+        }
+
+        // Salvar usuário no Firebase
+        function saveUserToFirebase(username, userData) {
+            if (!firebaseReady || !db) {
+                console.warn('⚠️ Firebase não disponível ainda, salvando apenas localStorage');
+                return;
+            }
+
+            try {
+                db.ref(`usuarios/${username}`).set(userData)
+                    .then(() => {
+                        console.log('✅ Usuário salvo no Firebase:', username);
+                    })
+                    .catch(error => {
+                        console.error('❌ Erro ao salvar em Firebase:', error.message);
+                    });
+            } catch (error) {
+                console.warn('⚠️ Firebase erro:', error.message);
+            }
+        }
+
+        // Sincronizar todos os usuários com Firebase
+        function syncAllUsersToFirebase() {
+            if (!firebaseReady || !db) {
+                console.warn('⚠️ Firebase não disponível');
+                alert('⚠️ Firebase não está inicializado. Tente atualizar a página.');
+                return;
+            }
+
+            let syncedCount = 0;
+            Object.entries(allUsers).forEach(([username, userData]) => {
+                saveUserToFirebase(username, userData);
+                syncedCount++;
+            });
+            
+            console.log(`✅ ${syncedCount} usuários sincronizados com Firebase!`);
+            alert(`✅ ${syncedCount} usuários sincronizados com sucesso!`);
         }
 
         function openExerciseModal() {
