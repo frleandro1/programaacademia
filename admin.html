@@ -787,6 +787,26 @@
             alert(`✅ ${syncedCount} usuários sincronizados com sucesso!`);
         }
 
+        // 🔥 Sincronizar treino do usuário com Firebase
+        function saveTrainingToFirebase(username, trainingData) {
+            if (!firebaseReady || !db) {
+                console.warn('⚠️ Firebase não disponível, treino salvo apenas localmente');
+                return;
+            }
+
+            try {
+                db.ref(`usuarios/${username}/treinos`).set(trainingData)
+                    .then(() => {
+                        console.log('✅ Treino sincronizado no Firebase:', username);
+                    })
+                    .catch(error => {
+                        console.error('❌ Erro ao sincronizar treino:', error.message);
+                    });
+            } catch (error) {
+                console.warn('⚠️ Firebase erro:', error.message);
+            }
+        }
+
         function openExerciseModal() {
             document.getElementById('exerciseModal').classList.add('active');
         }
@@ -939,6 +959,10 @@
             if (!userTraining[grupo].includes(exId)) {
                 userTraining[grupo].push(exId);
                 localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
+                
+                // 🔥 Sincronizar com Firebase
+                saveTrainingToFirebase(username, userTraining);
+                
                 console.log('Exercise added. New training:', userTraining);
                 showSuccess('Exercício adicionado com sucesso!');
                 loadUserTraining(); // Recarrega a interface
@@ -957,6 +981,10 @@
             };
             
             localStorage.setItem(`custom_training_${username}`, JSON.stringify(customTraining));
+            
+            // 🔥 Sincronizar com Firebase
+            saveTrainingToFirebase(username, customTraining);
+            
             showSuccess('Carga e repetições atualizadas com sucesso!');
             loadUserTraining();
         }
@@ -967,6 +995,10 @@
                 if (userTraining[grupo]) {
                     userTraining[grupo] = userTraining[grupo].filter(id => id !== parseInt(exerciseId));
                     localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
+                    
+                    // 🔥 Sincronizar com Firebase
+                    saveTrainingToFirebase(username, userTraining);
+                    
                     showSuccess('Exercício removido com sucesso!');
                     loadUserTraining();
                 }
