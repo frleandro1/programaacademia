@@ -358,6 +358,10 @@
             margin: 2px 0;
         }
     </style>
+
+    <!-- Firebase Scripts - Carregados diretamente -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
 </head>
 <body>
     <div class="header">
@@ -561,69 +565,20 @@
             if (!localStorage.getItem('adminUser')) {
                 window.location.href = 'admin-login.html';
             }
-            
-            // Inicializar Firebase para o painel admin
-            initializeFirebaseAdmin();
         }
 
         // Variáveis globais para Firebase
         let db = null;
         let firebaseReady = false;
-        let firebaseInitAttempts = 0;
-        const MAX_FIREBASE_ATTEMPTS = 3;
 
         // Inicializar Firebase no admin
         function initializeFirebaseAdmin() {
-            if (firebaseInitAttempts >= MAX_FIREBASE_ATTEMPTS) {
-                console.error('❌ Falha ao inicializar Firebase após múltiplas tentativas');
-                return;
-            }
-            
-            firebaseInitAttempts++;
-            console.log(`🔄 Tentativa ${firebaseInitAttempts} de inicializar Firebase...`);
-            
             try {
-                // Verificar se Firebase já está carregado globalmente
-                if (typeof firebase !== 'undefined') {
-                    initializeFirebaseConfig();
-                    return;
-                }
+                console.log('🔄 Inicializando Firebase...');
+                console.log('firebase disponível?', typeof firebase !== 'undefined');
                 
-                // Carregar Firebase dinamicamente
-                const script = document.createElement('script');
-                script.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-                script.async = true;
-                script.onload = () => {
-                    console.log('✅ Firebase App carregado');
-                    const script2 = document.createElement('script');
-                    script2.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
-                    script2.async = true;
-                    script2.onload = () => {
-                        console.log('✅ Firebase Database carregado');
-                        initializeFirebaseConfig();
-                    };
-                    script2.onerror = () => {
-                        console.error('❌ Erro ao carregar Firebase Database');
-                        setTimeout(initializeFirebaseAdmin, 1000);
-                    };
-                    document.head.appendChild(script2);
-                };
-                script.onerror = () => {
-                    console.error('❌ Erro ao carregar Firebase App');
-                    setTimeout(initializeFirebaseAdmin, 1000);
-                };
-                document.head.appendChild(script);
-            } catch (error) {
-                console.error('❌ Erro na inicialização:', error);
-                setTimeout(initializeFirebaseAdmin, 1000);
-            }
-        }
-
-        function initializeFirebaseConfig() {
-            try {
-                // Verificar se Firebase está disponível
                 if (typeof firebase === 'undefined') {
-                    console.warn('⚠️ Firebase não carregado ainda, tentando novamente...');
+                    console.error('❌ Firebase SDK não carregado');
                     setTimeout(initializeFirebaseAdmin, 1000);
                     return;
                 }
@@ -642,17 +597,16 @@
                 // Evitar reinicializar se já foi inicializado
                 if (firebase.apps.length === 0) {
                     firebase.initializeApp(firebaseConfig);
+                    console.log('✅ Firebase app inicializado');
                 }
                 
                 db = firebase.database();
                 firebaseReady = true;
-                console.log('✅ Firebase inicializado com sucesso no painel admin!');
-                console.log('🔥 Database URL:', firebaseConfig.databaseURL);
+                console.log('✅ Firebase Database inicializado com sucesso!');
+                console.log('🔥 URL:', firebaseConfig.databaseURL);
             } catch (error) {
-                console.error('❌ Erro ao configurar Firebase:', error.message);
-                if (firebaseInitAttempts < MAX_FIREBASE_ATTEMPTS) {
-                    setTimeout(initializeFirebaseAdmin, 2000);
-                }
+                console.error('❌ Erro ao inicializar Firebase:', error.message);
+                setTimeout(initializeFirebaseAdmin, 1000);
             }
         }
 
@@ -1316,8 +1270,14 @@
         }
 
         window.addEventListener('load', () => {
+            console.log('📄 Página carregada, iniciando admin...');
             checkAdminLogin();
             loadUsers();
+            
+            // Esperar um pouco para Firebase carregar
+            setTimeout(() => {
+                initializeFirebaseAdmin();
+            }, 500);
         });
     </script>
 </body>
