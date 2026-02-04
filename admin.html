@@ -360,8 +360,23 @@
     </style>
 
     <!-- Firebase Scripts - Carregados diretamente -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
+    <script async src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script async src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
+    
+    <!-- Script inline para aguardar Firebase -->
+    <script>
+        // Flag para Firebase
+        let firebaseScriptsLoaded = false;
+        
+        // Aguardar Firebase estar disponível
+        const waitForFirebase = setInterval(() => {
+            if (typeof firebase !== 'undefined' && firebase.database) {
+                console.log('✅ Firebase scripts carregados!');
+                firebaseScriptsLoaded = true;
+                clearInterval(waitForFirebase);
+            }
+        }, 100);
+    </script>
 </head>
 <body>
     <div class="header">
@@ -576,10 +591,11 @@
             try {
                 console.log('🔄 Inicializando Firebase...');
                 console.log('firebase disponível?', typeof firebase !== 'undefined');
+                console.log('firebaseScriptsLoaded?', firebaseScriptsLoaded);
                 
-                if (typeof firebase === 'undefined') {
-                    console.error('❌ Firebase SDK não carregado');
-                    setTimeout(initializeFirebaseAdmin, 1000);
+                if (typeof firebase === 'undefined' || !firebaseScriptsLoaded) {
+                    console.warn('⚠️ Firebase SDK ainda não carregou. Aguardando...');
+                    setTimeout(initializeFirebaseAdmin, 500);
                     return;
                 }
 
