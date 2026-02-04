@@ -215,34 +215,48 @@ async function syncExercisesDatabase() {
 // Lista de vídeos disponíveis na pasta videos/
 const AVAILABLE_VIDEOS = [
     'Agachamento Livre.mp4',
+    'Cadeira Adutora.mp4',
+    'Crucifixo Fly ou PecDeck máquina.mp4',
     'Crucifixo polia alta.mp4',
     'Desenvolvimento máquina.mp4',
     'Legpress Horizontal.mp4',
+    'Pulley tríceps barra reta.mp4',
+    'Pulley tríceps supinado.mp4',
     'Puxada frontal aberta.mp4',
+    'Puxada frontal aberta (1).mp4',
+    'Remada sentada máquina.mp4',
+    'Rosca Bíceps Halteres.mp4',
+    'Rosca Direta em Pé Polia baixa.mp4',
     'Rosca em Pé Halteres.mp4',
     'Supino inclinado 30 halteres.mp4',
     'Supino reto barra.mp4',
-    'Tríceps francês barra polia baixa.mp4'
+    'Tríceps francês barra polia baixa.mp4',
+    'Tríceps francês corda polia baixa.mp4',
+    'Tríceps pulley corda.mp4'
 ];
 
 // Mapa de variações de nomes para vídeos
 const EXERCISE_VIDEO_MAP = {
     // Crucifixo/Pecdeck
-    'crucifixo fly': 'Crucifixo polia alta.mp4',
-    'pecdeck maquina': 'Crucifixo polia alta.mp4',
+    'crucifixo fly': 'Crucifixo Fly ou PecDeck máquina.mp4',
+    'pecdeck maquina': 'Crucifixo Fly ou PecDeck máquina.mp4',
+    'pecdeck': 'Crucifixo Fly ou PecDeck máquina.mp4',
+    'crucifixo fly ou pecdeck maquina': 'Crucifixo Fly ou PecDeck máquina.mp4',
+    'fly': 'Crucifixo Fly ou PecDeck máquina.mp4',
+    'pec deck': 'Crucifixo Fly ou PecDeck máquina.mp4',
     'crucifixo polia alta': 'Crucifixo polia alta.mp4',
-    'fly': 'Crucifixo polia alta.mp4',
-    'pec deck': 'Crucifixo polia alta.mp4',
     
     // Tríceps - Francês/Corda/Pulley
     'triceps francês': 'Tríceps francês barra polia baixa.mp4',
-    'triceps francês corda palia baixa': 'Tríceps francês barra polia baixa.mp4',
-    'triceps francês corda polia baixa': 'Tríceps francês barra polia baixa.mp4',
-    'triceps corda palia baixa': 'Tríceps francês barra polia baixa.mp4',
-    'pulley triceps': 'Tríceps francês barra polia baixa.mp4',
-    'pulley triceps supinado': 'Tríceps francês barra polia baixa.mp4',
-    'triceps pulley corda': 'Tríceps francês barra polia baixa.mp4',
-    'triceps pulley': 'Tríceps francês barra polia baixa.mp4',
+    'triceps francês corda palia baixa': 'Tríceps francês corda polia baixa.mp4',
+    'triceps francês corda polia baixa': 'Tríceps francês corda polia baixa.mp4',
+    'triceps corda palia baixa': 'Tríceps francês corda polia baixa.mp4',
+    'triceps corda polia baixa': 'Tríceps francês corda polia baixa.mp4',
+    'pulley triceps': 'Pulley tríceps barra reta.mp4',
+    'pulley triceps supinado': 'Pulley tríceps supinado.mp4',
+    'pulley triceps barra reta': 'Pulley tríceps barra reta.mp4',
+    'triceps pulley corda': 'Tríceps pulley corda.mp4',
+    'triceps pulley': 'Tríceps pulley corda.mp4',
     
     // Puxada Frontal
     'puxada frontal': 'Puxada frontal aberta.mp4',
@@ -251,25 +265,27 @@ const EXERCISE_VIDEO_MAP = {
     'lat pulldown': 'Puxada frontal aberta.mp4',
     
     // Remada Sentada
-    'remada sentada': 'Puxada frontal aberta.mp4',
-    'remada sentada maquina': 'Puxada frontal aberta.mp4',
-    'seated row': 'Puxada frontal aberta.mp4',
+    'remada sentada': 'Remada sentada máquina.mp4',
+    'remada sentada maquina': 'Remada sentada máquina.mp4',
+    'seated row': 'Remada sentada máquina.mp4',
     
     // Rosca Bíceps
-    'rosca biceps': 'Rosca em Pé Halteres.mp4',
-    'rosca biceps halteres': 'Rosca em Pé Halteres.mp4',
+    'rosca biceps': 'Rosca Bíceps Halteres.mp4',
+    'rosca biceps halteres': 'Rosca Bíceps Halteres.mp4',
     'rosca em pé halteres': 'Rosca em Pé Halteres.mp4',
-    'rosca direta em pé polia baixa': 'Rosca em Pé Halteres.mp4',
-    'barbell curl': 'Rosca em Pé Halteres.mp4',
-    'dumbbell curl': 'Rosca em Pé Halteres.mp4',
+    'rosca direta em pé polia baixa': 'Rosca Direta em Pé Polia baixa.mp4',
+    'rosca direta pé polia baixa': 'Rosca Direta em Pé Polia baixa.mp4',
+    'barbell curl': 'Rosca Bíceps Halteres.mp4',
+    'dumbbell curl': 'Rosca Bíceps Halteres.mp4',
     
-    // Leg Press
+    // Leg Press / Agachamento
     'agachamento': 'Agachamento Livre.mp4',
     'agachamento livre': 'Agachamento Livre.mp4',
     'legpress': 'Legpress Horizontal.mp4',
     'leg press': 'Legpress Horizontal.mp4',
     'legpress horizontal': 'Legpress Horizontal.mp4',
-    'cadeira adutora': 'Legpress Horizontal.mp4',
+    'cadeira adutora': 'Cadeira Adutora.mp4',
+    'adutora': 'Cadeira Adutora.mp4',
     
     // Desenvolvimento
     'desenvolvimento': 'Desenvolvimento máquina.mp4',
