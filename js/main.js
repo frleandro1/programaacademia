@@ -261,6 +261,9 @@ const EXERCISE_VIDEO_MAP = {
     // Puxada Frontal
     'puxada frontal': 'Puxada frontal aberta.mp4',
     'puxada frontal aberta': 'Puxada frontal aberta.mp4',
+    'puxada frontal aberta variacao': 'Puxada frontal aberta (1).mp4',
+    'puxada frontal aberta (variação)': 'Puxada frontal aberta (1).mp4',
+    'puxada frontal variacao': 'Puxada frontal aberta (1).mp4',
     'pulldown': 'Puxada frontal aberta.mp4',
     'lat pulldown': 'Puxada frontal aberta.mp4',
     
