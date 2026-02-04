@@ -26,9 +26,18 @@ function checkLogin() {
     CURRENT_USER = JSON.parse(userJson);
     USUARIO_ID = CURRENT_USER.id;
     
+    // Verificar se treino foi selecionado
+    const selectedTreino = localStorage.getItem('selectedTreino');
+    if (!selectedTreino) {
+        console.warn('⚠️ Nenhum treino selecionado, redirecionando para login');
+        localStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+        return;
+    }
+    
     // Atualiza informações do usuário na página
     document.getElementById('userName').textContent = CURRENT_USER.name;
-    document.getElementById('userRoutine').textContent = `Rotina: ${CURRENT_USER.routine}`;
+    document.getElementById('userRoutine').textContent = `Treino: ${selectedTreino}`;
     document.getElementById('userGoal').textContent = `📌 ${CURRENT_USER.goal}`;
 }
 
@@ -586,6 +595,17 @@ async function loadTraining() {
         }
     } else {
         exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+    }
+    
+    // Filtrar apenas o treino selecionado
+    const selectedTreino = localStorage.getItem('selectedTreino');
+    if (selectedTreino && exercises[selectedTreino]) {
+        exercises = {
+            [selectedTreino]: exercises[selectedTreino]
+        };
+        console.log(`📅 Carregando treino ${selectedTreino} com ${exercises[selectedTreino].length} exercícios`);
+    } else if (selectedTreino) {
+        console.warn(`⚠️ Treino ${selectedTreino} não encontrado`);
     }
     
     renderizarTreino(exercises);
@@ -1191,8 +1211,56 @@ function finishSummary() {
         console.log('✅ Treino salvo no Firebase:', historyKey);
     }
     
+    // Passar para o próximo treino na sequência A->B->C->D->A
+    const currentTreino = localStorage.getItem('selectedTreino') || 'A';
+    const treinoSequence = ['A', 'B', 'C', 'D'];
+    const currentIndex = treinoSequence.indexOf(currentTreino);
+    const nextIndex = (currentIndex + 1) % treinoSequence.length;
+    const nextTreino = treinoSequence[nextIndex];
+    
+    console.log(`📅 Passando de ${currentTreino} para ${nextTreino}`);
+    localStorage.setItem('selectedTreino', nextTreino);
+    
     // Reseta o treino para o próximo dia
     resetAllExercises();
+    
+    // Recarrega a página para mostrar o próximo treino
+    setTimeout(() => {
+        window.location.reload();
+    }, 1000);
 }
+
+// ============ SELETOR DE TREINO ============
+
+function showTreinoSelector() {
+    const modal = document.getElementById('changeTreinoModal');
+    modal.style.display = 'flex';
+}
+
+function closeTreinoSelector() {
+    const modal = document.getElementById('changeTreinoModal');
+    modal.style.display = 'none';
+}
+
+function switchTreino(treino) {
+    console.log(`✅ Alternando para treino ${treino}`);
+    localStorage.setItem('selectedTreino', treino);
+    closeTreinoSelector();
+    
+    // Reseta os exercícios e recarrega a página
+    resetAllExercises();
+    setTimeout(() => {
+        window.location.reload();
+    }, 500);
+}
+
+// Fechar modal ao clicar fora dele
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('changeTreinoModal');
+    if (modal && event.target === modal) {
+        closeTreinoSelector();
+    }
+});
+
 
 window.addEventListener('load', init);
