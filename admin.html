@@ -657,7 +657,18 @@
         }
 
         function loadUsers() {
+            console.log('👥 Carregando usuários...');
+            console.log('allUsers:', allUsers);
+            
             const usersList = document.getElementById('usersList');
+            const usersCount = Object.keys(allUsers).length;
+            console.log(`📊 Total de usuários: ${usersCount}`);
+            
+            if (usersCount === 0) {
+                usersList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Nenhum usuário criado ainda</p>';
+                return;
+            }
+            
             usersList.innerHTML = Object.entries(allUsers).map(([username, user]) => `
                 <div class="user-item">
                     <div class="user-info">
@@ -668,6 +679,8 @@
                     </div>
                 </div>
             `).join('');
+            
+            console.log('✅ Usuários carregados com sucesso');
         }
 
         function loadExercises() {
@@ -753,6 +766,7 @@
 
         function saveUser(event) {
             event.preventDefault();
+            console.log('📝 Tentando salvar novo usuário...');
             
             const name = document.getElementById('userName').value;
             const username = document.getElementById('userUsername').value;
@@ -760,43 +774,72 @@
             const routine = document.getElementById('userRoutine').value;
             const goal = document.getElementById('userGoal').value;
 
-            if (allUsers[username]) {
-                alert('Este nome de usuário já existe!');
+            console.log('Dados coletados:', { name, username, password, routine, goal });
+
+            // Validações
+            if (!name || !username || !password || !routine || !goal) {
+                alert('❌ Preencha todos os campos!');
+                console.error('❌ Campos faltando:', { name, username, password, routine, goal });
                 return;
             }
 
-            const newId = Math.max(...Object.values(allUsers).map(u => u.id), 0) + 1;
-            const newUser = { name, password, id: newId, routine, goal };
-            allUsers[username] = newUser;
-
-            // Salvar no localStorage
-            localStorage.setItem('allUsers', JSON.stringify(allUsers));
-            
-            // Salvar no Firebase
-            saveUserToFirebase(username, newUser);
-
-            showSuccess('✅ Usuário criado com sucesso! (salvo localmente e em nuvem)');
-            closeUserModal();
-            loadUsers();
-        }
-
-        // Salvar usuário no Firebase
-        function saveUserToFirebase(username, userData) {
-            if (!firebaseReady || !db) {
-                console.warn('⚠️ Firebase não disponível ainda, salvando apenas localStorage');
+            if (allUsers[username]) {
+                alert('❌ Este nome de usuário já existe!');
+                console.warn('⚠️ Usuário já existe:', username);
                 return;
             }
 
             try {
-                db.ref(`usuarios/${username}`).set(userData)
+                const newId = Math.max(...Object.values(allUsers).map(u => u.id), 0) + 1;
+                const newUser = { name, password, id: newId, routine, goal };
+                console.log('✅ Novo usuário criado:', newUser);
+                
+                allUsers[username] = newUser;
+
+                // Salvar no localStorage
+                localStorage.setItem('allUsers', JSON.stringify(allUsers));
+                console.log('✅ Usuário salvo em localStorage:', username);
+                
+                // Salvar no Firebase
+                console.log('📤 Chamando saveUserToFirebase...');
+                saveUserToFirebase(username, newUser);
+
+                showSuccess('✅ Usuário criado com sucesso! (salvo localmente e em nuvem)');
+                closeUserModal();
+                loadUsers();
+            } catch (error) {
+                console.error('❌ Erro ao salvar usuário:', error);
+                alert('❌ Erro ao salvar: ' + error.message);
+            }
+        }
+
+        // Salvar usuário no Firebase
+        function saveUserToFirebase(username, userData) {
+            console.log('🔥 saveUserToFirebase chamado para:', username);
+            console.log('firebaseReady:', firebaseReady, '| db:', db ? 'existe' : 'null');
+            
+            if (!firebaseReady || !db) {
+                console.warn('⚠️ Firebase não disponível, usuário salvo apenas em localStorage');
+                console.warn('Tentando novamente em 1s...');
+                setTimeout(() => saveUserToFirebase(username, userData), 1000);
+                return;
+            }
+
+            try {
+                const path = `usuarios/${username}`;
+                console.log('📤 Salvando usuário em Firebase:', path);
+                console.log('📊 Dados:', userData);
+                
+                db.ref(path).set(userData)
                     .then(() => {
-                        console.log('✅ Usuário salvo no Firebase:', username);
+                        console.log('✅✅ Usuário salvo com SUCESSO no Firebase:', username);
                     })
                     .catch(error => {
-                        console.error('❌ Erro ao salvar em Firebase:', error.message);
+                        console.error('❌ Erro ao salvar em Firebase:', error.code, error.message);
+                        console.error('Detalhes do erro:', error);
                     });
             } catch (error) {
-                console.warn('⚠️ Firebase erro:', error.message);
+                console.error('❌ Erro crítico ao salvar usuário:', error.message);
             }
         }
 
