@@ -163,30 +163,6 @@
         </div>
     </div>
 
-    <!-- Modal de Seleção de Treino -->
-    <div id="treinoSelectorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); width: 90%; max-width: 500px; text-align: center;">
-            <div style="font-size: 3em; margin-bottom: 20px;">📅</div>
-            <h2 style="color: #1a3a52; margin-bottom: 10px;">Qual treino você quer fazer?</h2>
-            <p style="color: #666; margin-bottom: 30px; font-size: 0.95em;">Escolha o treino de hoje</p>
-            
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                <button type="button" onclick="selectTreino('A')" style="padding: 20px; background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%); color: white; border: none; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
-                    📅 TREINO A<br><span style="font-size: 0.7em; opacity: 0.9;">Push Pesado</span>
-                </button>
-                <button type="button" onclick="selectTreino('B')" style="padding: 20px; background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%); color: white; border: none; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
-                    📅 TREINO B<br><span style="font-size: 0.7em; opacity: 0.9;">Pull Pesado</span>
-                </button>
-                <button type="button" onclick="selectTreino('C')" style="padding: 20px; background: linear-gradient(135deg, #ffa502 0%, #ff8a3d 100%); color: white; border: none; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
-                    📅 TREINO C<br><span style="font-size: 0.7em; opacity: 0.9;">Push Moderado</span>
-                </button>
-                <button type="button" onclick="selectTreino('D')" style="padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
-                    📅 TREINO D<br><span style="font-size: 0.7em; opacity: 0.9;">Pernas + Pull</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Carregar usuários do localStorage (criados no admin)
         let USERS = {};
@@ -251,12 +227,6 @@
             }
         }
 
-        function selectTreino(treino) {
-            console.log(`✅ Treino selecionado: ${treino}`);
-            localStorage.setItem('selectedTreino', treino);
-            window.location.href = 'index.html';
-        }
-
         function handleLogin(event) {
             event.preventDefault();
             
@@ -284,9 +254,8 @@
                 goal: user.goal
             }));
 
-            // Mostrar modal de seleção de treino
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('treinoSelectorModal').style.display = 'flex';
+            // Redireciona para dashboard (seleção de treino acontece lá)
+            window.location.href = 'index.html';
         }
 
         // Se já está logado, redireciona para dashboard

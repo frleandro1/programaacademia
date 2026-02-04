@@ -29,9 +29,8 @@ function checkLogin() {
     // Verificar se treino foi selecionado
     const selectedTreino = localStorage.getItem('selectedTreino');
     if (!selectedTreino) {
-        console.warn('⚠️ Nenhum treino selecionado, redirecionando para login');
-        localStorage.removeItem('currentUser');
-        window.location.href = 'login.html';
+        console.log('📅 Mostrando seletor de treino');
+        showInitialTreinoSelector();
         return;
     }
     
@@ -1252,6 +1251,66 @@ function switchTreino(treino) {
     setTimeout(() => {
         window.location.reload();
     }, 500);
+}
+
+function showInitialTreinoSelector() {
+    // Cria um modal de seleção inicial de treino (após login)
+    const container = document.querySelector('.container');
+    if (!container) return;
+    
+    const modal = document.createElement('div');
+    modal.id = 'initialTreinoModal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.8);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 50px 40px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); width: 90%; max-width: 550px; text-align: center;">
+            <div style="font-size: 4em; margin-bottom: 25px;">📅</div>
+            <h1 style="color: #1a3a52; margin-bottom: 15px; font-size: 2em;">Qual treino você quer fazer?</h1>
+            <p style="color: #666; margin-bottom: 35px; font-size: 1em;">Escolha o treino de hoje</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                <button onclick="selectInitialTreino('A')" style="padding: 25px 15px; background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
+                    📅 TREINO A<br><small style="font-size: 0.75em; opacity: 0.9;">Push Pesado</small>
+                </button>
+                <button onclick="selectInitialTreino('B')" style="padding: 25px 15px; background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
+                    📅 TREINO B<br><small style="font-size: 0.75em; opacity: 0.9;">Pull Pesado</small>
+                </button>
+                <button onclick="selectInitialTreino('C')" style="padding: 25px 15px; background: linear-gradient(135deg, #ffa502 0%, #ff8a3d 100%); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
+                    📅 TREINO C<br><small style="font-size: 0.75em; opacity: 0.9;">Push Moderado</small>
+                </button>
+                <button onclick="selectInitialTreino('D')" style="padding: 25px 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
+                    📅 TREINO D<br><small style="font-size: 0.75em; opacity: 0.9;">Pernas + Pull</small>
+                </button>
+            </div>
+            
+            <button onclick="handleLogout()" style="width: 100%; padding: 12px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Sair</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function selectInitialTreino(treino) {
+    console.log(`✅ Treino selecionado inicialmente: ${treino}`);
+    localStorage.setItem('selectedTreino', treino);
+    
+    // Remove modal e recarrega
+    const modal = document.getElementById('initialTreinoModal');
+    if (modal) modal.remove();
+    
+    // Reinicializa a página com o treino selecionado
+    window.location.reload();
 }
 
 // Fechar modal ao clicar fora dele
