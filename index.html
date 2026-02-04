@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academia - Dashboard</title>
     <link rel="stylesheet" href="css/styles.css?v=6">
+    
+    <!-- Firebase Scripts (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script>
+        // Flag para indicar que Firebase foi carregado
+        window.firebaseScriptsLoaded = false;
+        
+        // Detectar quando Firebase está disponível
+        let firebaseCheckInterval = setInterval(() => {
+            if (typeof firebase !== 'undefined' && firebase.apps !== undefined) {
+                window.firebaseScriptsLoaded = true;
+                clearInterval(firebaseCheckInterval);
+                console.log('✅ Firebase scripts carregados com sucesso');
+            }
+        }, 50);
+        
+        // Timeout se não carregar em 5 segundos
+        setTimeout(() => {
+            if (!window.firebaseScriptsLoaded) {
+                clearInterval(firebaseCheckInterval);
+                console.warn('⚠️ Firebase scripts não carregaram no tempo esperado');
+            }
+        }, 5000);
+    </script>
 </head>
 <body>
     <div class="header">

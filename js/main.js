@@ -45,41 +45,68 @@ function handleLogout() {
 function initializeFirebase() {
     if (!USE_FIREBASE) return;
     
-    try {
-        // Importar e inicializar Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyB5CPHE4fvlkZYa0KkINr-NlhIMPYs4qAM",
-            authDomain: "academiatreinoapp-d2004.firebaseapp.com",
-            databaseURL: "https://academiatreinoapp-d2004-default-rtdb.firebaseio.com",
-            projectId: "academiatreinoapp-d2004",
-            storageBucket: "academiatreinoapp-d2004.firebasestorage.app",
-            messagingSenderId: "1075985055185",
-            appId: "1:1075985055185:web:bdaf8c84c4778361e974f0",
-            measurementId: "G-8TVK5XD653"
-        };
-
-        // Inicializar Firebase
-        const script = document.createElement('script');
-        script.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        script.onload = () => {
-            const script2 = document.createElement('script');
-            script2.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
-            script2.onload = () => {
-                window.firebase = {
-                    app: firebase.initializeApp(firebaseConfig),
-                    db: firebase.database()
+    console.log('🔥 Iniciando Firebase...');
+    
+    // Checar se Firebase já está carregado
+    let retries = 0;
+    const maxRetries = 20;
+    
+    const checkFirebase = () => {
+        console.log(`Tentativa ${retries + 1}/${maxRetries}: firebase =`, typeof firebase);
+        
+        if (typeof firebase !== 'undefined' && typeof firebase.database === 'function') {
+            console.log('✅ Firebase disponível, inicializando...');
+            
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyB5CPHE4fvlkZYa0KkINr-NlhIMPYs4qAM",
+                    authDomain: "academiatreinoapp-d2004.firebaseapp.com",
+                    databaseURL: "https://academiatreinoapp-d2004-default-rtdb.firebaseio.com",
+                    projectId: "academiatreinoapp-d2004",
+                    storageBucket: "academiatreinoapp-d2004.firebasestorage.app",
+                    messagingSenderId: "1075985055185",
+                    appId: "1:1075985055185:web:bdaf8c84c4778361e974f0",
+                    measurementId: "G-8TVK5XD653"
                 };
-                db = window.firebase.db;
+                
+                // Inicializar firebase app se não estiver inicializado
+                let app;
+                if (firebase.apps && firebase.apps.length === 0) {
+                    app = firebase.initializeApp(firebaseConfig);
+                    console.log('✅ App Firebase inicializado');
+                } else {
+                    app = firebase.app();
+                    console.log('✅ Usando app Firebase existente');
+                }
+                
+                // Obter referência do banco de dados
+                db = firebase.database();
                 firebaseReady = true;
-                console.log('✅ Firebase iniciado com sucesso!');
-                syncFirebaseData();
-            };
-            document.head.appendChild(script2);
-        };
-        document.head.appendChild(script);
-    } catch (error) {
-        console.warn('⚠️ Firebase não disponível, usando localStorage:', error);
-    }
+                
+                console.log('═════════════════════════════════════════════');
+                console.log('✅✅✅ FIREBASE PRONTO PARA USO ✅✅✅');
+                console.log('═════════════════════════════════════════════');
+                
+                // Sincronizar dados após Firebase estar pronto
+                if (CURRENT_USER) {
+                    syncFirebaseData();
+                }
+            } catch (error) {
+                console.error('❌ Erro ao inicializar Firebase:', error);
+                firebaseReady = false;
+            }
+        } else if (retries < maxRetries) {
+            retries++;
+            console.log(`⏳ Firebase não pronto, tentando novamente em 100ms...`);
+            setTimeout(checkFirebase, 100);
+        } else {
+            console.warn('⚠️ Firebase não carregou após múltiplas tentativas, usando localStorage apenas');
+            firebaseReady = false;
+        }
+    };
+    
+    // Iniciar verificação
+    checkFirebase();
 }
 
 // Sincronizar dados com Firebase
