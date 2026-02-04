@@ -1093,6 +1093,7 @@
             panel.style.display = 'block';
 
             let html = `<h3>📅 Treino de ${allUsers[selectedUser].name}</h3>`;
+            html += `<form id="trainingForm" onsubmit="saveCompleteTraining(event)">`;
 
             ['push', 'pull', 'legs'].forEach(grupo => {
                 const groupExercises = Object.entries(allExercises).filter(([id, ex]) => ex.grupo === grupo);
@@ -1101,43 +1102,32 @@
                 html += `<div class="training-group">
                     <h3>${grupo === 'push' ? '💪 Push' : grupo === 'pull' ? '🔙 Pull' : '🦵 Legs'}</h3>`;
 
+                // Mostrar exercícios já adicionados
                 if (userGroupExercises.length > 0) {
+                    html += `<div style="margin-bottom: 20px;">
+                        <h4 style="color: #ff6b6b; margin-bottom: 10px;">✅ Exercícios Adicionados:</h4>`;
+                    
                     html += userGroupExercises.map(exId => {
                         const ex = allExercises[exId];
                         if (!ex) return '';
                         
-                        // Carrega valores customizados ou usa os padrões
-                        let customTraining = JSON.parse(localStorage.getItem(`custom_training_${selectedUser}`)) || {};
-                        let userExerciseData = customTraining[exId] || { series: ex.series, load: ex.load };
-                        
                         return `
-                            <div class="training-exercise">
-                                <div class="exercise-details">
+                            <div style="background: #fff9f9; padding: 12px; margin-bottom: 10px; border-radius: 6px; border-left: 4px solid #ff6b6b; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
                                     <p><strong>${ex.name}</strong></p>
-                                    <div style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                        <div>
-                                            <label style="font-size: 0.9em; color: #666;">Séries/Reps:</label>
-                                            <input type="text" id="series_${exId}" value="${userExerciseData.series}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em;" placeholder="ex: 3x12">
-                                        </div>
-                                        <div>
-                                            <label style="font-size: 0.9em; color: #666;">Carga:</label>
-                                            <input type="text" id="load_${exId}" value="${userExerciseData.load}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em;" placeholder="ex: 10kg">
-                                        </div>
-                                    </div>
-                                    <p style="font-size: 0.85em; color: #999; margin-top: 5px;">Intervalo: ${ex.interval}</p>
+                                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                                        📋 ${ex.series} | ⚖️ ${ex.load} | ⏱️ ${ex.interval}
+                                    </p>
                                 </div>
-                                <div style="display: flex; gap: 5px;">
-                                    <button class="btn-primary" onclick="saveExerciseCustomization('${selectedUser}', ${exId}, document.getElementById('series_${exId}').value, document.getElementById('load_${exId}').value)" style="flex: 1; padding: 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">✓ Salvar</button>
-                                    <button class="btn-danger" onclick="removeExerciseFromTraining('${selectedUser}', '${grupo}', ${exId})" style="flex: 1; padding: 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">✕ Remover</button>
-                                </div>
+                                <button type="button" class="btn-danger" onclick="removeExerciseFromTraining('${selectedUser}', '${grupo}', ${exId})" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">✕ Remover</button>
                             </div>
                         `;
                     }).join('');
-                } else {
-                    html += `<p style="color: #999; font-style: italic;">Nenhum exercício atribuído</p>`;
+                    
+                    html += `</div>`;
                 }
 
-                // Formulário para adicionar exercícios
+                // Mostrar exercícios disponíveis com checkboxes
                 const availableExercises = groupExercises.filter(([id]) => !userGroupExercises.includes(parseInt(id)));
                 
                 if (availableExercises.length > 0) {
@@ -1146,15 +1136,18 @@
                             <h4>✨ Adicionar Exercício (${availableExercises.length} disponíveis)</h4>
                             <div class="exercise-select">
                                 ${availableExercises.map(([id, ex]) => `
-                                    <div class="exercise-option" onclick="addExerciseToTraining('${selectedUser}', '${grupo}', ${id})" style="padding: 12px; background: white; border: 2px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.2s ease;">
-                                        <h4 style="color: #333; font-size: 0.95em; margin-bottom: 8px; font-weight: 600;">${ex.name}</h4>
-                                        <div style="font-size: 0.85em; color: #666;">
-                                            <p>📋 Séries: <strong>${ex.series}</strong></p>
-                                            <p>⚖️ Carga: <strong>${ex.load}</strong></p>
-                                            <p>⏱️ Intervalo: <strong>${ex.interval}</strong></p>
-                                            ${ex.instructions ? `<p style="margin-top: 5px; color: #999; font-size: 0.8em; font-style: italic;">💡 ${ex.instructions}</p>` : ''}
+                                    <label style="display: flex; align-items: center; padding: 12px; background: white; border: 2px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 10px;">
+                                        <input type="checkbox" name="exercise_${id}" value="${id}" style="width: 20px; height: 20px; cursor: pointer; margin-right: 15px;">
+                                        <div style="flex: 1;">
+                                            <h4 style="color: #333; font-size: 0.95em; margin: 0 0 5px 0; font-weight: 600;">${ex.name}</h4>
+                                            <div style="font-size: 0.85em; color: #666;">
+                                                <p style="margin: 2px 0;">📋 Séries: <strong>${ex.series}</strong></p>
+                                                <p style="margin: 2px 0;">⚖️ Carga: <strong>${ex.load}</strong></p>
+                                                <p style="margin: 2px 0;">⏱️ Intervalo: <strong>${ex.interval}</strong></p>
+                                                ${ex.instructions ? `<p style="margin-top: 5px; color: #999; font-size: 0.8em; font-style: italic;">💡 ${ex.instructions}</p>` : ''}
+                                            </div>
                                         </div>
-                                    </div>
+                                    </label>
                                 `).join('')}
                             </div>
                         </div>
@@ -1164,79 +1157,63 @@
                 html += `</div>`;
             });
 
+            html += `
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #ddd; display: flex; gap: 10px;">
+                    <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: bold;">
+                        💾 Salvar Treino
+                    </button>
+                </div>
+            </form>
+            `;
+
             panel.innerHTML = html;
         }
 
-        function addExerciseToTraining(username, grupo, exerciseId) {
+        function saveCompleteTraining(event) {
+            event.preventDefault();
             console.log('═════════════════════════════════════════════');
-            console.log('📌 ADICIONANDO EXERCÍCIO AO TREINO');
+            console.log('💾 SALVANDO TREINO COMPLETO');
             console.log('═════════════════════════════════════════════');
-            console.log('👤 Usuário:', username);
-            console.log('💪 Grupo:', grupo);
-            console.log('🏋️ Exercício ID:', exerciseId);
-            console.log('─────────────────────────────────────────────');
+            console.log('👤 Usuário:', selectedUser);
+
+            const form = document.getElementById('trainingForm');
+            const formData = new FormData(form);
             
-            // Verificar Firebase
-            console.log('🔥 Status Firebase:');
-            console.log('  • firebaseReady:', firebaseReady);
-            console.log('  • db existe:', db ? 'SIM' : 'NÃO');
-            
-            try {
-                let userTraining = JSON.parse(localStorage.getItem(`training_${username}`)) || { push: [], pull: [], legs: [] };
-                if (!userTraining[grupo]) userTraining[grupo] = [];
-                
-                console.log('📊 Treino atual:', userTraining);
-                
+            let userTraining = JSON.parse(localStorage.getItem(`training_${selectedUser}`)) || { push: [], pull: [], legs: [] };
+
+            // Percorrer todos os checkboxes marcados
+            let exercisesAdded = 0;
+            for (let [key, exerciseId] of formData.entries()) {
                 const exId = parseInt(exerciseId);
                 
-                if (!userTraining[grupo].includes(exId)) {
-                    userTraining[grupo].push(exId);
-                    
-                    console.log('✅ Exercício adicionado ao array local:', userTraining[grupo]);
-                    
-                    // Salvar em localStorage
-                    localStorage.setItem(`training_${username}`, JSON.stringify(userTraining));
-                    console.log('✅ SALVO em localStorage!');
-                    
-                    // 🔥 Sincronizar com Firebase
-                    console.log('📤 ENVIANDO para Firebase...');
-                    saveTrainingToFirebase(username, userTraining);
-                    
-                    console.log('═════════════════════════════════════════════');
-                    console.log('✨ Exercício adicionado com sucesso!');
-                    console.log('═════════════════════════════════════════════');
-                    
-                    showSuccess('✅ Exercício adicionado com sucesso!');
-                    loadUserTraining(); // Recarrega a interface
-                } else {
-                    console.log('⚠️ Exercício já existe no treino');
-                    alert('⚠️ Este exercício já está no treino!');
+                // Adicionar exercício a todos os grupos (será filtrado depois)
+                let allExercises = JSON.parse(localStorage.getItem('allExercises')) || DEMO_EXERCISES;
+                const exercise = allExercises[exId];
+                
+                if (exercise) {
+                    const grupo = exercise.grupo;
+                    if (!userTraining[grupo].includes(exId)) {
+                        userTraining[grupo].push(exId);
+                        exercisesAdded++;
+                        console.log(`✅ Exercício adicionado: ${exercise.name} (${grupo})`);
+                    }
                 }
-            } catch (error) {
-                console.error('❌ ERRO ao adicionar exercício:', error);
-                console.error('Stack:', error.stack);
-                alert('❌ Erro: ' + error.message);
             }
-        }
 
-        function saveExerciseCustomization(username, exerciseId, series, load) {
-            console.log(`💾 Salvando customização do exercício ${exerciseId} para ${username}`);
-            console.log(`📋 Séries: ${series}, Carga: ${load}`);
-            
-            let customTraining = JSON.parse(localStorage.getItem(`custom_training_${username}`)) || {};
-            customTraining[exerciseId] = {
-                series: series.trim() || 'N/A',
-                load: load.trim() || 'N/A'
-            };
-            
-            localStorage.setItem(`custom_training_${username}`, JSON.stringify(customTraining));
-            console.log('✅ Customização salva em localStorage');
-            
+            console.log('─────────────────────────────────────────────');
+            console.log('📊 Treino final:', userTraining);
+            console.log(`📌 Total de exercícios adicionados: ${exercisesAdded}`);
+
+            // Salvar em localStorage
+            localStorage.setItem(`training_${selectedUser}`, JSON.stringify(userTraining));
+            console.log('✅ Salvo em localStorage');
+
             // 🔥 Sincronizar com Firebase
-            saveTrainingToFirebase(username, customTraining);
-            
-            showSuccess('Carga e repetições atualizadas com sucesso!');
-            loadUserTraining();
+            console.log('📤 Enviando para Firebase...');
+            saveTrainingToFirebase(selectedUser, userTraining);
+
+            showSuccess(`✅ Treino salvo com ${exercisesAdded} exercício(s)!`);
+            loadUserTraining(); // Recarrega a interface
         }
 
         function removeExerciseFromTraining(username, grupo, exerciseId) {
