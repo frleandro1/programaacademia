@@ -88,10 +88,12 @@ function syncFirebaseData() {
     
     const username = CURRENT_USER.name;
     
-    // Sincronizar treino
-    const training = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    // Sincronizar treino (exercícios)
+    const training = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
     if (Object.keys(training).length > 0) {
         saveToFirebase(`trainings/${username}`, training);
+        // Também salvar no banco de exercícios globais
+        saveToFirebase(`exercises/all`, DEMO_DATA);
     }
     
     // Sincronizar customizações
@@ -148,7 +150,42 @@ async function loadFromFirebase(path) {
             resolve(null);
         }
     });
-}// Lista de vídeos disponíveis na pasta videos/
+}
+
+// Sincronizar banco de exercícios completo no Firebase
+async function syncExercisesDatabase() {
+    if (!firebaseReady) {
+        console.warn('⚠️ Firebase não está pronto');
+        return;
+    }
+    
+    try {
+        console.log('📤 Atualizando banco de exercícios no Firebase...');
+        
+        // Salvar exercícios globais
+        await saveToFirebase('exercises/all', DEMO_DATA);
+        
+        // Salvar por categoria
+        await saveToFirebase('exercises/push', DEMO_DATA.push);
+        await saveToFirebase('exercises/pull', DEMO_DATA.pull);
+        await saveToFirebase('exercises/legs', DEMO_DATA.legs);
+        
+        // Contar exercícios
+        const totalExercises = DEMO_DATA.push.length + DEMO_DATA.pull.length + DEMO_DATA.legs.length;
+        
+        console.log(`✅ Banco sincronizado! Total: ${totalExercises} exercícios`);
+        console.log(`   • Push: ${DEMO_DATA.push.length}`);
+        console.log(`   • Pull: ${DEMO_DATA.pull.length}`);
+        console.log(`   • Legs: ${DEMO_DATA.legs.length}`);
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Erro ao sincronizar exercícios:', error);
+        return false;
+    }
+}
+
+// Lista de vídeos disponíveis na pasta videos/
 const AVAILABLE_VIDEOS = [
     'Agachamento Livre.mp4',
     'Crucifixo polia alta.mp4',
@@ -373,6 +410,14 @@ function init() {
     checkLogin();
     initializeFirebase();
     initializeDemoData();
+    
+    // Sincronizar banco de exercícios no Firebase após um pequeno delay
+    setTimeout(() => {
+        if (firebaseReady) {
+            syncExercisesDatabase();
+        }
+    }, 1000);
+    
     loadTraining();
     startTrainingTimer();
 }

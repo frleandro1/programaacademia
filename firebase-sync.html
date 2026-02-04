@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Database Sync - Academia App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .status-box {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .status-box.success {
+            border-left-color: #4caf50;
+            background: #e8f5e9;
+        }
+        
+        .status-box.warning {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+        
+        .status-box.error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .status-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 2px solid #667eea;
+        }
+        
+        button.secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .info-box li {
+            margin: 5px 0;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .stat-card h4 {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .log-box {
+            background: #263238;
+            color: #4db8ff;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        
+        .log-entry.success {
+            color: #4caf50;
+        }
+        
+        .log-entry.error {
+            color: #f44336;
+        }
+        
+        .log-entry.warning {
+            color: #ff9800;
+        }
+        
+        .log-entry.info {
+            color: #2196f3;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firebase Database Sync</h1>
+        <p class="subtitle">Academia Treino App - Sincronização de Banco de Dados</p>
+        
+        <div id="statusBox" class="status-box">
+            <span class="status-icon">⏳</span>
+            <strong>Status:</strong> Carregando...
+        </div>
+        
+        <div class="button-group">
+            <button onclick="syncDatabase()">🔄 Sincronizar Banco</button>
+            <button onclick="testConnection()" class="secondary">🧪 Testar Conexão</button>
+            <button onclick="clearLog()" class="secondary">🗑️ Limpar Log</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h4>EXERCÍCIOS PUSH</h4>
+                <div class="number">10</div>
+            </div>
+            <div class="stat-card">
+                <h4>EXERCÍCIOS PULL</h4>
+                <div class="number">6</div>
+            </div>
+            <div class="stat-card">
+                <h4>EXERCÍCIOS LEGS</h4>
+                <div class="number">3</div>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <p style="text-align: center; color: #666; margin-top: 5px;">
+            <span id="progressText">0%</span>
+        </p>
+        
+        <div class="info-box">
+            <h3>📊 Banco de Dados Estrutura</h3>
+            <ul>
+                <li><strong>exercises/all</strong> - Todos os exercícios</li>
+                <li><strong>exercises/push</strong> - Exercícios de Push (10)</li>
+                <li><strong>exercises/pull</strong> - Exercícios de Pull (6)</li>
+                <li><strong>exercises/legs</strong> - Exercícios de Legs (3)</li>
+                <li><strong>trainings/{username}</strong> - Treino do usuário</li>
+                <li><strong>sessions/{username}</strong> - Sessão ativa</li>
+            </ul>
+        </div>
+        
+        <div class="log-box" id="logBox">
+            <div class="log-entry info">🔧 Sistema pronto para sincronização...</div>
+        </div>
+        
+        <div class="info-box">
+            <h3>ℹ️ Como Usar</h3>
+            <ul>
+                <li>Clique em <strong>"Sincronizar Banco"</strong> para atualizar todos os exercícios</li>
+                <li>Use <strong>"Testar Conexão"</strong> para verificar conexão com Firebase</li>
+                <li>Os dados são sincronizados automaticamente ao fazer login na app</li>
+                <li>Verifique o console do navegador (F12) para mais detalhes</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const logBox = document.getElementById('logBox');
+        const statusBox = document.getElementById('statusBox');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logBox.appendChild(entry);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const icons = {
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️',
+                'info': 'ℹ️'
+            };
+            
+            statusBox.className = `status-box ${type}`;
+            statusBox.innerHTML = `
+                <span class="status-icon">${icons[type]}</span>
+                <strong>Status:</strong> ${message}
+            `;
+        }
+        
+        function updateProgress(percent) {
+            progressFill.style.width = percent + '%';
+            progressText.textContent = percent + '%';
+        }
+        
+        function clearLog() {
+            logBox.innerHTML = '';
+            addLog('Log limpo', 'info');
+        }
+        
+        async function testConnection() {
+            addLog('🧪 Testando conexão com Firebase...', 'info');
+            updateStatus('Testando conexão...', 'warning');
+            updateProgress(25);
+            
+            try {
+                // Verificar se está no index.html (que tem acesso a Firebase)
+                if (typeof firebaseReady === 'undefined') {
+                    addLog('⚠️ Firebase não carregado. Abra a aplicação principal primeiro!', 'warning');
+                    updateStatus('Firebase não disponível - abra index.html primeiro', 'warning');
+                    updateProgress(0);
+                    return;
+                }
+                
+                if (!firebaseReady) {
+                    addLog('⏳ Aguardando Firebase inicializar...', 'info');
+                    updateProgress(50);
+                    
+                    // Aguardar Firebase ficar pronto
+                    for (let i = 0; i < 10; i++) {
+                        await new Promise(r => setTimeout(r, 500));
+                        if (firebaseReady) break;
+                    }
+                }
+                
+                if (firebaseReady) {
+                    addLog('✅ Conexão com Firebase estabelecida!', 'success');
+                    updateProgress(100);
+                    updateStatus('Conexão OK - Firebase pronto!', 'success');
+                } else {
+                    addLog('❌ Firebase não inicializou', 'error');
+                    updateStatus('Erro - Firebase não inicializou', 'error');
+                    updateProgress(0);
+                }
+            } catch (error) {
+                addLog(`❌ Erro: ${error.message}`, 'error');
+                updateStatus('Erro na conexão', 'error');
+                updateProgress(0);
+            }
+        }
+        
+        async function syncDatabase() {
+            addLog('📤 Iniciando sincronização do banco...', 'info');
+            updateStatus('Sincronizando...', 'warning');
+            updateProgress(10);
+            
+            try {
+                if (typeof syncExercisesDatabase === 'undefined') {
+                    addLog('⚠️ Função de sync não disponível. Abra index.html primeiro!', 'warning');
+                    updateStatus('Função de sync não disponível', 'warning');
+                    updateProgress(0);
+                    return;
+                }
+                
+                updateProgress(30);
+                addLog('🔄 Chamando sincExercisesDatabase()...', 'info');
+                
+                const result = await syncExercisesDatabase();
+                
+                updateProgress(80);
+                
+                if (result) {
+                    addLog('✅ Banco sincronizado com sucesso!', 'success');
+                    addLog('📊 Total: 19 exercícios (Push: 10, Pull: 6, Legs: 3)', 'success');
+                    updateProgress(100);
+                    updateStatus('Sincronização concluída com sucesso!', 'success');
+                } else {
+                    addLog('❌ Erro na sincronização', 'error');
+                    updateStatus('Erro na sincronização', 'error');
+                    updateProgress(0);
+                }
+            } catch (error) {
+                addLog(`❌ Erro: ${error.message}`, 'error');
+                updateStatus('Erro durante sincronização', 'error');
+                updateProgress(0);
+            }
+        }
+        
+        // Testar conexão automaticamente ao carregar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                addLog('🚀 Página carregada', 'info');
+                addLog('💡 Abra a aplicação principal (index.html) para funcionalidade completa', 'warning');
+                updateStatus('Aguardando...');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
