@@ -176,10 +176,11 @@ body {
 .exercise-card {
     background: white;
     border-radius: 8px;
-    padding: 20px;
+    padding: 15px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     display: flex;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
     align-items: flex-start;
     transition: all 0.3s ease;
     margin-bottom: 15px;
@@ -329,8 +330,8 @@ body {
 }
 
 .exercise-image {
-    width: 140px;
-    height: 140px;
+    width: 120px;
+    height: 120px;
     background: #1a1a1a;
     border-radius: 8px;
     display: flex;
@@ -339,6 +340,7 @@ body {
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     flex-shrink: 0;
+    min-width: 120px;
 }
 
 .exercise-image video {
@@ -439,22 +441,63 @@ body {
     opacity: 0.5;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .exercise-card {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        padding: 12px;
     }
 
     .exercise-image {
-        display: none;
+        width: 100%;
+        height: 200px;
+        min-width: unset;
+    }
+
+    .exercise-meta {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .exercise-card {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .exercise-image {
+        width: 100%;
+        height: 180px;
+        min-width: unset;
     }
 
     .exercise-meta {
         grid-template-columns: 1fr;
     }
 
-    .header {
-        flex-direction: column;
-        text-align: center;
+    .exercise-title {
+        font-size: 1em;
+    }
+
+    .meta-label {
+        font-size: 0.7em;
+    }
+
+    .meta-value {
+        font-size: 0.85em;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px;
+    }
+
+    .dashboard-value {
+        font-size: 1.3em;
     }
 }
 

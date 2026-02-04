@@ -253,15 +253,18 @@ function renderizarTreino(exercises) {
                 
                 if (thumbUrl && thumbUrl.startsWith('./videos/')) {
                     // Para vídeos locais, renderiza um vídeo HTML5 com controles
+                    // Otimizado para mobile com preload lazy
                     imageHtml = `
-                        <video width="100%" height="100%" style="border-radius: 8px; object-fit: cover;" controls>
+                        <video width="100%" height="100%" style="border-radius: 8px; object-fit: cover;" 
+                               controls preload="metadata" 
+                               poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%231a1a1a'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='30'%3E▶%3C/text%3E%3C/svg%3E">
                             <source src="${thumbUrl}" type="video/mp4">
                             💪
                         </video>
                     `;
                 } else if (thumbUrl) {
-                    // Para YouTube, usa imagem
-                    imageHtml = `<img src="${thumbUrl}" alt="${ex.name}">`;
+                    // Para YouTube, usa imagem com loading lazy
+                    imageHtml = `<img src="${thumbUrl}" alt="${ex.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">`;
                 } else {
                     // Fallback
                     imageHtml = `<div class="no-image">💪</div>`;
