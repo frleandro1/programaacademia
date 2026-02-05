@@ -107,7 +107,7 @@ body {
 .dashboard-card {
     background: linear-gradient(135deg, #2c5aa0 0%, #1a3a52 100%);
     color: white;
-    padding: 30px;
+    padding: 20px 30px;
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -136,12 +136,13 @@ body {
     opacity: 0.9;
     text-transform: uppercase;
     font-weight: 600;
+    margin: 0;
 }
 
 .dashboard-value {
     font-size: 1.8em;
     font-weight: 700;
-    margin-top: 5px;
+    margin: 3px 0 0 0;
     font-family: 'Courier New', monospace;
     letter-spacing: 0.05em;
 }
