@@ -170,15 +170,50 @@ function syncFirebaseData() {
 }
 
 // Salvar dados no Firebase
+// Limpar valores undefined antes de salvar no Firebase
+function cleanDataForFirebase(data) {
+    if (data === null || data === undefined) return null;
+    
+    if (Array.isArray(data)) {
+        return data.map(item => cleanDataForFirebase(item)).filter(item => item !== undefined);
+    }
+    
+    if (typeof data === 'object') {
+        const cleaned = {};
+        for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+                const value = data[key];
+                if (value !== undefined) {
+                    cleaned[key] = cleanDataForFirebase(value);
+                }
+            }
+        }
+        return Object.keys(cleaned).length > 0 ? cleaned : null;
+    }
+    
+    return data;
+}
+
 function saveToFirebase(path, data) {
     if (!firebaseReady) return;
     
     try {
+        // Limpar valores undefined antes de salvar
+        const cleanedData = cleanDataForFirebase(data);
+        
+        if (!cleanedData) {
+            console.warn(`⚠️ Dados vazios após limpeza, não salvando em Firebase: ${path}`);
+            return;
+        }
+        
+        console.log(`📤 Salvando em Firebase (${path}):`, cleanedData);
+        
         const ref = db.ref(path);
-        ref.set(data).then(() => {
+        ref.set(cleanedData).then(() => {
             console.log(`✅ Salvo em Firebase: ${path}`);
         }).catch(error => {
             console.error(`❌ Erro ao salvar em Firebase: ${path}`, error);
+            console.error(`📊 Dados que causaram erro:`, cleanedData);
         });
     } catch (error) {
         console.error('Erro Firebase:', error);
@@ -220,21 +255,27 @@ async function syncExercisesDatabase() {
     try {
         console.log('📤 Atualizando banco de exercícios no Firebase...');
         
-        // Salvar exercícios globais
+        // Salvar exercícios globais (estrutura ABCD)
         await saveToFirebase('exercises/all', DEMO_DATA);
         
-        // Salvar por categoria
-        await saveToFirebase('exercises/push', DEMO_DATA.push);
-        await saveToFirebase('exercises/pull', DEMO_DATA.pull);
-        await saveToFirebase('exercises/legs', DEMO_DATA.legs);
+        // Salvar por categoria (A, B, C, D)
+        if (DEMO_DATA.A) await saveToFirebase('exercises/A', DEMO_DATA.A);
+        if (DEMO_DATA.B) await saveToFirebase('exercises/B', DEMO_DATA.B);
+        if (DEMO_DATA.C) await saveToFirebase('exercises/C', DEMO_DATA.C);
+        if (DEMO_DATA.D) await saveToFirebase('exercises/D', DEMO_DATA.D);
         
         // Contar exercícios
-        const totalExercises = DEMO_DATA.push.length + DEMO_DATA.pull.length + DEMO_DATA.legs.length;
+        const totalExercises = 
+            (DEMO_DATA.A ? DEMO_DATA.A.length : 0) + 
+            (DEMO_DATA.B ? DEMO_DATA.B.length : 0) + 
+            (DEMO_DATA.C ? DEMO_DATA.C.length : 0) + 
+            (DEMO_DATA.D ? DEMO_DATA.D.length : 0);
         
         console.log(`✅ Banco sincronizado! Total: ${totalExercises} exercícios`);
-        console.log(`   • Push: ${DEMO_DATA.push.length}`);
-        console.log(`   • Pull: ${DEMO_DATA.pull.length}`);
-        console.log(`   • Legs: ${DEMO_DATA.legs.length}`);
+        console.log(`   • A: ${DEMO_DATA.A ? DEMO_DATA.A.length : 0}`);
+        console.log(`   • B: ${DEMO_DATA.B ? DEMO_DATA.B.length : 0}`);
+        console.log(`   • C: ${DEMO_DATA.C ? DEMO_DATA.C.length : 0}`);
+        console.log(`   • D: ${DEMO_DATA.D ? DEMO_DATA.D.length : 0}`);
         
         return true;
     } catch (error) {
