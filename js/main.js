@@ -681,6 +681,14 @@ async function loadTraining() {
         console.warn(`⚠️ Nenhum treino selecionado`);
     }
     
+    // Debug: Verificar todos os treinos disponíveis
+    console.log('✅ TREINOS DISPONÍVEIS APÓS VALIDAÇÃO:');
+    Object.keys(exercises).forEach(treino => {
+        if (exercises[treino] && Array.isArray(exercises[treino])) {
+            console.log(`   📅 Treino ${treino}: ${exercises[treino].length} exercícios`);
+        }
+    });
+    
     renderizarTreino(exercises);
 }
 
