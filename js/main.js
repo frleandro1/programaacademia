@@ -597,6 +597,16 @@ async function initializeDemoData() {
 
 async function loadTraining() {
     let exercises;
+    let userExerciseIds = {}; // Exercícios específicos do usuário
+    
+    // Tentar carregar o treino específico do usuário do localStorage (salvo pelo admin)
+    if (CURRENT_USER) {
+        const userTraining = JSON.parse(localStorage.getItem(`training_${CURRENT_USER.username}`));
+        if (userTraining) {
+            userExerciseIds = userTraining;
+            console.log(`📚 Treino do usuário ${CURRENT_USER.username} carregado:`, userExerciseIds);
+        }
+    }
     
     if (USE_DATABASE) {
         try {
@@ -614,7 +624,24 @@ async function loadTraining() {
             exercises = DEMO_DATA;
         }
     } else {
-        exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+        // Se há treino do usuário, usar apenas esses exercícios
+        if (Object.keys(userExerciseIds).length > 0) {
+            let allExercises = JSON.parse(localStorage.getItem('allExercises')) || DEMO_DATA;
+            exercises = { A: [], B: [], C: [], D: [] };
+            
+            // Reconstituir a estrutura ABCD com apenas os exercícios do usuário
+            Object.entries(userExerciseIds).forEach(([grupo, exerciseIds]) => {
+                exercises[grupo] = exerciseIds.map(exId => {
+                    // Procurar em allExercises (como objeto com chaves numéricas)
+                    return allExercises[exId] || Object.values(allExercises).find(ex => ex.id === exId);
+                }).filter(Boolean);
+            });
+            
+            console.log(`✅ Exercícios do usuário carregados:`, exercises);
+        } else {
+            // Se não houver treino específico, usar DEMO_DATA
+            exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+        }
     }
     
     // Filtrar apenas o treino selecionado
@@ -826,7 +853,6 @@ function decreaseLoad(exerciseId) {
 }
 
 function toggleComplete(group, id) {
-    const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
     if (USE_DATABASE) {
         const completed = event.target.checked;
         
@@ -852,22 +878,32 @@ function toggleComplete(group, id) {
         })
         .catch(error => console.error('Erro:', error));
     } else {
-        const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-        const ex = exercises[group].find(e => e.id === id);
-        if (ex) {
-            ex.completed = !ex.completed;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
-            
-            // Sincronizar com Firebase
-            if (firebaseReady && CURRENT_USER) {
-                saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
-            }
-            
-            // Verifica se todos os exercícios foram concluídos
-            checkIfWorkoutComplete(exercises);
-            
-            loadTraining();
+        // Atualizar em ambos os localStorage: STORAGE_KEY e training_${username}
+        let exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        let userTraining = null;
+        
+        if (CURRENT_USER) {
+            userTraining = JSON.parse(localStorage.getItem(`training_${CURRENT_USER.username}`)) || {};
         }
+        
+        // Atualizar no STORAGE_KEY (para compatibilidade)
+        if (exercises[group]) {
+            const ex = exercises[group].find(e => e.id === id);
+            if (ex) {
+                ex.completed = !ex.completed;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+            }
+        }
+        
+        // Sincronizar com Firebase
+        if (firebaseReady && CURRENT_USER) {
+            saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+        }
+        
+        // Verifica se todos os exercícios foram concluídos
+        checkIfWorkoutComplete(exercises);
+        
+        loadTraining();
     }
 }
 
