@@ -48,21 +48,28 @@ function handleLogout() {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('selectedTreino');
         
-        // Limpar também dados de treino do usuário
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser) {
-            localStorage.removeItem(`training_${currentUser.username}`);
-            localStorage.removeItem(`custom_training_${currentUser.username}`);
-            localStorage.removeItem(`training_session_${currentUser.username}`);
+        // Limpar também dados de treino do usuário (ANTES de remover currentUser)
+        const currentUserStr = localStorage.getItem('currentUser');
+        if (currentUserStr) {
+            try {
+                const currentUser = JSON.parse(currentUserStr);
+                localStorage.removeItem(`training_${currentUser.username}`);
+                localStorage.removeItem(`custom_training_${currentUser.username}`);
+                localStorage.removeItem(`training_session_${currentUser.username}`);
+            } catch (e) {
+                console.warn('Erro ao limpar dados:', e);
+            }
         }
         
         console.log('📤 Redirecionando para login...');
-        setTimeout(() => {
-            window.location.href = './login.html';
-        }, 300);
+        // Redirecionar para login
+        window.location.href = './login.html';
     }
     return false;
 }
+
+// Tornar global para garantir acesso do HTML
+window.handleLogout = handleLogout;
 
 // ============ INICIALIZAÇÃO FIREBASE ============
 
@@ -1502,5 +1509,15 @@ document.addEventListener('click', function(event) {
     }
 });
 
+// ============ GARANTIR FUNÇÕES GLOBAIS ============
+// Expor funções para o HTML (onclick)
+window.handleLogout = handleLogout;
+window.showTreinoSelector = showTreinoSelector;
+window.resetAllExercises = resetAllExercises;
+window.toggleComplete = toggleComplete;
+window.showVideoModal = showVideoModal;
+window.saveLoad = saveLoad;
+window.switchTreino = switchTreino;
+window.selectInitialTreino = selectInitialTreino;
 
 window.addEventListener('load', init);
