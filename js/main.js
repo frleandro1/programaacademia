@@ -41,10 +41,23 @@ function checkLogin() {
 }
 
 function handleLogout() {
+    console.log('🚪 Clicou em Sair');
     if (confirm('Tem certeza que deseja sair?')) {
+        console.log('✅ Confirmou logout');
         stopTrainingTimer();
         localStorage.removeItem('currentUser');
-        window.location.href = 'login.html';
+        localStorage.removeItem('selectedTreino');
+        
+        // Limpar também dados de treino do usuário
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser) {
+            localStorage.removeItem(`training_${currentUser.username}`);
+            localStorage.removeItem(`custom_training_${currentUser.username}`);
+            localStorage.removeItem(`training_session_${currentUser.username}`);
+        }
+        
+        console.log('📤 Redirecionando para login...');
+        window.location.href = './login.html';
     }
 }
 
