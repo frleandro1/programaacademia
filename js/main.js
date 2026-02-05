@@ -599,6 +599,8 @@ async function loadTraining() {
     let exercises;
     let userExerciseIds = {}; // Exercícios específicos do usuário
     
+    console.log('📚 Iniciando loadTraining...');
+    
     // Tentar carregar o treino específico do usuário do localStorage (salvo pelo admin)
     if (CURRENT_USER) {
         const userTraining = JSON.parse(localStorage.getItem(`training_${CURRENT_USER.username}`));
@@ -617,11 +619,11 @@ async function loadTraining() {
                 exercises = organizarExerciciosPorGrupo(data.exercicios);
             } else {
                 console.error('Erro ao carregar exercícios:', data.error);
-                exercises = DEMO_DATA;
+                exercises = JSON.parse(JSON.stringify(DEMO_DATA));
             }
         } catch (error) {
             console.error('Erro na conexão com API:', error);
-            exercises = DEMO_DATA;
+            exercises = JSON.parse(JSON.stringify(DEMO_DATA));
         }
     } else {
         // Se há treino do usuário, usar apenas esses exercícios
@@ -641,27 +643,22 @@ async function loadTraining() {
             
             console.log(`✅ Exercícios do usuário carregados:`, exercises);
         } else {
-            // Se não houver treino específico, usar DEMO_DATA
-            let loaded = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
-            // Garantir que tem a estrutura correta { A: [], B: [], C: [], D: [] }
-            exercises = { A: [], B: [], C: [], D: [] };
-            if (loaded.A) exercises.A = loaded.A;
-            if (loaded.B) exercises.B = loaded.B;
-            if (loaded.C) exercises.C = loaded.C;
-            if (loaded.D) exercises.D = loaded.D;
-            
-            console.log(`📚 Treino padrão carregado:`, exercises);
+            // Se não houver treino específico, usar DEMO_DATA (cópia limpa)
+            exercises = JSON.parse(JSON.stringify(DEMO_DATA));
+            console.log(`📚 Usando DEMO_DATA padrão`);
         }
     }
     
-    // Garantir que exercises sempre tenha a estrutura ABCD
-    if (!exercises || typeof exercises !== 'object') {
-        exercises = DEMO_DATA;
-        console.warn(`⚠️ Estrutura de exercícios inválida, usando DEMO_DATA`);
+    // Garantir que exercises sempre tenha a estrutura ABCD com pelo menos um exercício
+    if (!exercises || typeof exercises !== 'object' || !exercises.A || !exercises.B || !exercises.C || !exercises.D) {
+        console.warn(`⚠️ Estrutura de exercícios inválida, restaurando DEMO_DATA`);
+        exercises = JSON.parse(JSON.stringify(DEMO_DATA));
     }
     
     // Filtrar apenas o treino selecionado
     const selectedTreino = localStorage.getItem('selectedTreino');
+    console.log(`📅 selectedTreino:`, selectedTreino, `| Treinos disponíveis:`, Object.keys(exercises));
+    
     if (selectedTreino) {
         if (exercises[selectedTreino] && Array.isArray(exercises[selectedTreino])) {
             exercises = {
@@ -669,12 +666,13 @@ async function loadTraining() {
             };
             console.log(`📅 Carregando treino ${selectedTreino} com ${exercises[selectedTreino].length} exercícios`);
         } else {
-            console.warn(`⚠️ Treino ${selectedTreino} não encontrado ou inválido. Usando DEMO_DATA.`);
-            exercises = DEMO_DATA;
+            console.warn(`⚠️ Treino ${selectedTreino} não encontrado ou inválido. Restaurando DEMO_DATA.`);
+            exercises = JSON.parse(JSON.stringify(DEMO_DATA));
             if (exercises[selectedTreino]) {
                 exercises = {
                     [selectedTreino]: exercises[selectedTreino]
                 };
+                console.log(`✅ Treino ${selectedTreino} restaurado de DEMO_DATA`);
             }
         }
     } else {
@@ -1384,14 +1382,16 @@ function switchTreino(treino) {
     
     // Limpar dados de treino anterior (tanto user-specific quanto global)
     if (CURRENT_USER) {
-        // Limpar treino específico do usuário
+        // Limpar treino específico do usuário para que use DEMO_DATA
         localStorage.removeItem(`training_${CURRENT_USER.username}`);
         localStorage.removeItem(`custom_training_${CURRENT_USER.username}`);
         console.log(`🧹 Limpando treino anterior de ${CURRENT_USER.username}`);
     }
     
-    // Reseta os exercícios globais
-    const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+    // Usar DEMO_DATA limpo (sem user training específico)
+    let exercises = JSON.parse(JSON.stringify(DEMO_DATA));
+    
+    // Resetar todos os exercícios como não completados
     Object.keys(exercises).forEach(group => {
         if (Array.isArray(exercises[group])) {
             exercises[group].forEach(ex => {
@@ -1399,7 +1399,10 @@ function switchTreino(treino) {
             });
         }
     });
+    
+    // Salvar a estrutura limpa
     localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+    console.log(`💾 Salvando estrutura limpa de DEMO_DATA para ${treino}`);
     
     // Sincronizar com Firebase
     if (firebaseReady && CURRENT_USER) {
@@ -1410,6 +1413,8 @@ function switchTreino(treino) {
     // Recarrega o treino
     setTimeout(() => {
         loadTraining();
+    }, 100);
+}
     }, 100);
 }
 
