@@ -1382,7 +1382,15 @@ function switchTreino(treino) {
     localStorage.setItem('selectedTreino', treino);
     closeTreinoSelector();
     
-    // Reseta os exercícios sem pedir confirmação (apenas alterna)
+    // Limpar dados de treino anterior (tanto user-specific quanto global)
+    if (CURRENT_USER) {
+        // Limpar treino específico do usuário
+        localStorage.removeItem(`training_${CURRENT_USER.username}`);
+        localStorage.removeItem(`custom_training_${CURRENT_USER.username}`);
+        console.log(`🧹 Limpando treino anterior de ${CURRENT_USER.username}`);
+    }
+    
+    // Reseta os exercícios globais
     const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
     Object.keys(exercises).forEach(group => {
         if (Array.isArray(exercises[group])) {
@@ -1398,6 +1406,7 @@ function switchTreino(treino) {
         saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
     }
     
+    console.log(`📚 Recarregando treino ${treino}`);
     // Recarrega o treino
     setTimeout(() => {
         loadTraining();
