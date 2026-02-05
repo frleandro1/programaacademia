@@ -1212,6 +1212,8 @@ function stopTrainingTimer() {
 // ============ FUNÇÕES DE CONCLUSÃO DE TREINO ============
 
 function checkIfWorkoutComplete(exercises) {
+    console.log(`🔍 checkIfWorkoutComplete chamado com:`, exercises);
+    
     // Conta total e concluídos
     let totalExercises = 0;
     let completedExercises = 0;
@@ -1238,6 +1240,9 @@ function checkIfWorkoutComplete(exercises) {
 }
 
 function showWorkoutSummary(exercises) {
+    console.log(`🎯 showWorkoutSummary chamado com exercises:`, exercises);
+    console.log(`👤 CURRENT_USER:`, CURRENT_USER);
+    
     const customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.username}`)) || {};
     
     // Calcula dados do treino
@@ -1418,12 +1423,14 @@ function closeSummary() {
 }
 
 function sendNotification(exercises) {
+    console.log(`📲 sendNotification chamado`);
+    
     try {
         // Calcula estatísticas
         const customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.username}`)) || {};
         const trainingStats = calculateTrainingStats(exercises, customTraining);
         
-        console.log('📢 Tentando enviar notificação...');
+        console.log(`💬 Tentando enviar notificação...`);        console.log('📢 Tentando enviar notificação...');
         
         // Tenta enviar notificação do navegador (Web Push API)
         if ('Notification' in window) {
@@ -1503,6 +1510,8 @@ function playSuccessSound() {
 }
 
 function saveWorkoutCompletion(trainingStats) {
+    console.log(`💾 saveWorkoutCompletion chamado com trainingStats:`, trainingStats);
+    
     try {
         const today = new Date().toISOString().split('T')[0];
         const completionsKey = `workout_completions_${CURRENT_USER.username}`;
