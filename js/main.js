@@ -1257,9 +1257,14 @@ function checkIfWorkoutComplete(exercises) {
 }
 
 function showFinishButton(exercises) {
+    console.log(`🔵 showFinishButton chamado`);
+    
     // Remove botão anterior se existir
     const existingBtn = document.getElementById('finish-workout-btn');
-    if (existingBtn) existingBtn.remove();
+    if (existingBtn) {
+        console.log(`🗑️ Removendo botão anterior`);
+        existingBtn.remove();
+    }
     
     // Cria botão flutuante de conclusão
     const button = document.createElement('button');
@@ -1276,14 +1281,19 @@ function showFinishButton(exercises) {
     `;
     
     button.onclick = () => {
+        console.log(`✅ Botão clicado`);
         showWorkoutSummary(exercises);
         sendNotification(exercises);
     };
     
     document.body.appendChild(button);
+    console.log(`✅ Botão adicionado ao DOM`, button);
     
     // Animação de entrada
-    setTimeout(() => button.classList.add('show'), 100);
+    setTimeout(() => {
+        button.classList.add('show');
+        console.log(`✅ Classe 'show' adicionada ao botão`);
+    }, 100);
 }
 
 function showWorkoutSummary(exercises) {
