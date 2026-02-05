@@ -699,50 +699,62 @@
             
             const modal = document.createElement('div');
             modal.id = 'editUserModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                z-index: 1001;
+            `;
             modal.innerHTML = `
-                <div class="modal-overlay" onclick="closeEditUserModal()"></div>
-                <div class="modal-content" style="max-width: 500px;">
-                    <div class="modal-header">
-                        <h2>✏️ Editar Dados de ${user.name}</h2>
+                <div style="position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ff6b6b; padding-bottom: 10px;">
+                        <h2 style="margin: 0; color: #333;">✏️ Editar Dados de ${user.name}</h2>
                         <button onclick="closeEditUserModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
                     </div>
-                    <div class="modal-body">
-                        <form id="editUserForm" onsubmit="saveEditedUserData(event, '${username}')">
-                            <div class="form-group">
-                                <label for="editUserName">Nome Completo:</label>
-                                <input type="text" id="editUserName" value="${user.name}" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="editUserRoutine">Rotina (dias/semana):</label>
-                                <select id="editUserRoutine" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
-                                    <option value="3" ${user.routine === '3' ? 'selected' : ''}>3 dias/semana</option>
-                                    <option value="4" ${user.routine === '4' ? 'selected' : ''}>4 dias/semana</option>
-                                    <option value="5" ${user.routine === '5' ? 'selected' : ''}>5 dias/semana</option>
-                                    <option value="6" ${user.routine === '6' ? 'selected' : ''}>6 dias/semana</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="editUserGoal">Objetivo:</label>
-                                <select id="editUserGoal" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
-                                    <option value="strength" ${user.goal === 'strength' ? 'selected' : ''}>Força</option>
-                                    <option value="hypertrophy" ${user.goal === 'hypertrophy' ? 'selected' : ''}>Hipertrofia</option>
-                                    <option value="endurance" ${user.goal === 'endurance' ? 'selected' : ''}>Resistência</option>
-                                    <option value="weight-loss" ${user.goal === 'weight-loss' ? 'selected' : ''}>Perda de Peso</option>
-                                </select>
-                            </div>
-                            
-                            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                                <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                    💾 Salvar Alterações
-                                </button>
-                                <button type="button" onclick="closeEditUserModal()" class="btn-secondary" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                    Cancelar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    <form id="editUserForm" onsubmit="saveEditedUserData(event, '${username}')">
+                        <div class="form-group">
+                            <label for="editUserName">Nome Completo:</label>
+                            <input type="text" id="editUserName" value="${user.name}" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editUserRoutine">Rotina (dias/semana):</label>
+                            <select id="editUserRoutine" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                                <option value="3" ${user.routine === '3' ? 'selected' : ''}>3 dias/semana</option>
+                                <option value="4" ${user.routine === '4' ? 'selected' : ''}>4 dias/semana</option>
+                                <option value="5" ${user.routine === '5' ? 'selected' : ''}>5 dias/semana</option>
+                                <option value="6" ${user.routine === '6' ? 'selected' : ''}>6 dias/semana</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editUserGoal">Objetivo:</label>
+                            <select id="editUserGoal" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                                <option value="strength" ${user.goal === 'strength' ? 'selected' : ''}>Força</option>
+                                <option value="hypertrophy" ${user.goal === 'hypertrophy' ? 'selected' : ''}>Hipertrofia</option>
+                                <option value="endurance" ${user.goal === 'endurance' ? 'selected' : ''}>Resistência</option>
+                                <option value="weight-loss" ${user.goal === 'weight-loss' ? 'selected' : ''}>Perda de Peso</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                💾 Salvar Alterações
+                            </button>
+                            <button type="button" onclick="closeEditUserModal()" class="btn-secondary" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
                 </div>
             `;
             
@@ -790,40 +802,52 @@
         function editUserPassword(username) {
             const modal = document.createElement('div');
             modal.id = 'editPasswordModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                max-width: 400px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                z-index: 1001;
+            `;
             modal.innerHTML = `
-                <div class="modal-overlay" onclick="closeEditPasswordModal()"></div>
-                <div class="modal-content" style="max-width: 400px;">
-                    <div class="modal-header">
-                        <h2>🔐 Alterar Senha</h2>
+                <div style="position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ff6b6b; padding-bottom: 10px;">
+                        <h2 style="margin: 0; color: #333;">🔐 Alterar Senha</h2>
                         <button onclick="closeEditPasswordModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
                     </div>
-                    <div class="modal-body">
-                        <form id="editPasswordForm" onsubmit="saveNewPassword(event, '${username}')">
-                            <div class="form-group">
-                                <label for="currentPassword">Senha Atual:</label>
-                                <input type="password" id="currentPassword" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="newPassword">Nova Senha:</label>
-                                <input type="password" id="newPassword" required minlength="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;" placeholder="Mínimo 6 caracteres">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="confirmPassword">Confirmar Senha:</label>
-                                <input type="password" id="confirmPassword" required minlength="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
-                            </div>
-                            
-                            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                                <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                    🔐 Alterar Senha
-                                </button>
-                                <button type="button" onclick="closeEditPasswordModal()" class="btn-secondary" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                    Cancelar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    <form id="editPasswordForm" onsubmit="saveNewPassword(event, '${username}')">
+                        <div class="form-group">
+                            <label for="currentPassword">Senha Atual:</label>
+                            <input type="password" id="currentPassword" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newPassword">Nova Senha:</label>
+                            <input type="password" id="newPassword" required minlength="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;" placeholder="Mínimo 6 caracteres">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirmar Senha:</label>
+                            <input type="password" id="confirmPassword" required minlength="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                🔐 Alterar Senha
+                            </button>
+                            <button type="button" onclick="closeEditPasswordModal()" class="btn-secondary" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
                 </div>
             `;
             
