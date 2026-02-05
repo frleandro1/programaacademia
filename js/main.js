@@ -1048,11 +1048,15 @@ function toggleComplete(event, group, id) {
         
         console.log(`✅ Exercício ${id} marcado como ${completed ? 'concluído' : 'não concluído'} em ${updateCount} local(is)`);
         
-        // Verifica se todos os exercícios foram concluídos
-        checkIfWorkoutComplete(exercises);
-        
         // Recarregar treino para atualizar a visualização
-        loadTraining();
+        loadTraining().then(() => {
+            // Após recarregar, busca os exercícios atualizados do localStorage
+            const updatedExercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+            console.log(`🔄 Exercícios atualizados após loadTraining:`, updatedExercises);
+            
+            // Verifica se todos os exercícios foram concluídos
+            checkIfWorkoutComplete(updatedExercises);
+        });
     }
 }
 
