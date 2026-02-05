@@ -173,7 +173,47 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
+
     <script>
+        // Configuração Firebase
+        let db = null;
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5CPHE4fvlkZYa0KkINr-NlhIMPYs4qAM",
+            authDomain: "academiatreinoapp-d2004.firebaseapp.com",
+            databaseURL: "https://academiatreinoapp-d2004-default-rtdb.firebaseio.com",
+            projectId: "academiatreinoapp-d2004",
+            storageBucket: "academiatreinoapp-d2004.firebasestorage.app",
+            messagingSenderId: "1075985055185",
+            appId: "1:1075985055185:web:bdaf8c84c4778361e974f0",
+            measurementId: "G-8TVK5XD653"
+        };
+
+        // Inicializar Firebase
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+            console.log('✅ Firebase inicializado no login');
+        } catch (error) {
+            console.warn('⚠️ Firebase não disponível no login:', error);
+        }
+
+        // Salvar usuário no Firebase
+        async function saveUserToFirebase(username, userData) {
+            if (!db) return false;
+            try {
+                await db.ref(`users/${username}`).set(userData);
+                console.log('✅ Usuário sincronizado com Firebase:', username);
+                return true;
+            } catch (error) {
+                console.error('❌ Erro ao sincronizar com Firebase:', error);
+                return false;
+            }
+        }
+
         // Carregar usuários do localStorage (criados no admin)
         let USERS = {};
         
@@ -264,7 +304,7 @@
             console.log(`✅ Login bem-sucedido: ${username}`);
 
             // Salva informações do usuário
-            localStorage.setItem('currentUser', JSON.stringify({
+            const currentUserData = {
                 id: user.id,
                 username: username,
                 name: user.name,
@@ -273,7 +313,14 @@
                 currentWeight: user.currentWeight,
                 startWeight: user.startWeight,
                 registrationDate: user.registrationDate
-            }));
+            };
+
+            localStorage.setItem('currentUser', JSON.stringify(currentUserData));
+
+            // Sincronizar com Firebase também
+            if (db) {
+                saveUserToFirebase(username, user);
+            }
 
             // Redireciona para dashboard (seleção de treino acontece lá)
             window.location.href = 'index.html';
@@ -425,12 +472,15 @@
             allUsers[username] = USERS[username];
             localStorage.setItem('allUsers', JSON.stringify(allUsers));
 
-            console.log(`✅ Novo usuário criado: ${username}`);
-            console.log(`⚖️ Peso Atual: ${currentWeight}kg`);
-            console.log(`⚖️ Peso no Cadastro: ${startWeight}kg`);
+            // Sincronizar com Firebase
+            saveUserToFirebase(username, USERS[username]).then(() => {
+                console.log(`✅ Novo usuário criado: ${username}`);
+                console.log(`⚖️ Peso Atual: ${currentWeight}kg`);
+                console.log(`⚖️ Peso no Cadastro: ${startWeight}kg`);
 
-            alert(`✅ Conta criada com sucesso, ${name}!\n\nPeso Atual: ${currentWeight}kg\nPeso no Cadastro: ${startWeight}kg\n\nVocê já pode fazer login.`);
-            showLoginForm(e);
+                alert(`✅ Conta criada com sucesso, ${name}!\n\nPeso Atual: ${currentWeight}kg\nPeso no Cadastro: ${startWeight}kg\n\nVocê já pode fazer login.`);
+                showLoginForm(e);
+            });
         }
 
         function showLoginForm(e) {
