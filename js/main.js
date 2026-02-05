@@ -665,6 +665,10 @@ async function loadTraining() {
     
     console.log('📚 Iniciando loadTraining...');
     
+    // Carregar o estado salvo do localStorage (STORAGE_KEY) que contém os estados de completed
+    let savedState = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    console.log(`💾 Estado salvo carregado:`, savedState);
+    
     // Tentar carregar o treino específico do usuário do localStorage (salvo pelo admin)
     if (CURRENT_USER) {
         const userTraining = JSON.parse(localStorage.getItem(`training_${CURRENT_USER.username}`));
@@ -718,6 +722,23 @@ async function loadTraining() {
         console.warn(`⚠️ Estrutura de exercícios inválida, restaurando DEMO_DATA`);
         exercises = JSON.parse(JSON.stringify(DEMO_DATA));
     }
+    
+    // Restaurar o estado de completed (checked) a partir do savedState
+    console.log(`🔄 Restaurando estado de completed dos exercícios...`);
+    Object.keys(exercises).forEach(group => {
+        if (Array.isArray(exercises[group])) {
+            exercises[group].forEach(ex => {
+                // Procurar o estado salvo no savedState
+                if (savedState[group]) {
+                    const savedEx = savedState[group].find(e => e.id === ex.id);
+                    if (savedEx) {
+                        ex.completed = savedEx.completed;
+                        console.log(`✅ Restaurado: ${ex.name} = ${ex.completed}`);
+                    }
+                }
+            });
+        }
+    });
     
     // Filtrar apenas o treino selecionado
     const selectedTreino = localStorage.getItem('selectedTreino');
@@ -951,6 +972,8 @@ function decreaseLoad(exerciseId) {
 function toggleComplete(event, group, id) {
     const completed = event.target.checked;
     
+    console.log(`🔄 toggleComplete chamado: grupo=${group}, id=${id}, completed=${completed}`);
+    
     if (USE_DATABASE) {
         fetch(`${API_URL}?action=completar&usuario_id=${USUARIO_ID}`, {
             method: 'POST',
@@ -978,7 +1001,9 @@ function toggleComplete(event, group, id) {
         let exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
         
         console.log(`🔍 Atualizando exercício - Grupo: ${group}, ID: ${id}, Concluído: ${completed}`);
-        console.log(`📊 Exercícios antes:`, exercises[group]);
+        console.log(`📊 Exercícios atuais no localStorage:`, exercises);
+        
+        let updateCount = 0;
         
         // Atualizar no STORAGE_KEY (para compatibilidade)
         if (exercises[group]) {
@@ -987,11 +1012,12 @@ function toggleComplete(event, group, id) {
                 ex.completed = completed;
                 console.log(`✅ Exercício atualizado em STORAGE_KEY:`, ex);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+                updateCount++;
             } else {
                 console.warn(`⚠️ Exercício ${id} não encontrado no grupo ${group}`);
             }
         } else {
-            console.warn(`⚠️ Grupo ${group} não encontrado`);
+            console.warn(`⚠️ Grupo ${group} não encontrado em exercises`);
         }
         
         // Atualizar também no training_${username} se existir
@@ -1003,21 +1029,29 @@ function toggleComplete(event, group, id) {
                     ex.completed = completed;
                     localStorage.setItem(`training_${CURRENT_USER.username}`, JSON.stringify(userTraining));
                     console.log(`✅ Exercício atualizado em training_${CURRENT_USER.username}`);
+                    updateCount++;
                 }
             }
             
             // Sincronizar com Firebase
             if (firebaseReady) {
+                console.log(`📤 Sincronizando com Firebase: trainings/${CURRENT_USER.name}`);
                 saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
-                console.log(`📤 Sincronizado com Firebase`);
             }
         }
         
-        console.log(`✅ Exercício ${id} marcado como ${completed ? 'concluído' : 'não concluído'}`);
+        if (updateCount === 0) {
+            console.error(`❌ Exercício ${id} não foi atualizado em nenhum local!`);
+            event.target.checked = !completed; // Reverter o checkbox
+            return;
+        }
+        
+        console.log(`✅ Exercício ${id} marcado como ${completed ? 'concluído' : 'não concluído'} em ${updateCount} local(is)`);
         
         // Verifica se todos os exercícios foram concluídos
         checkIfWorkoutComplete(exercises);
         
+        // Recarregar treino para atualizar a visualização
         loadTraining();
     }
 }
