@@ -1382,11 +1382,26 @@ function switchTreino(treino) {
     localStorage.setItem('selectedTreino', treino);
     closeTreinoSelector();
     
-    // Reseta os exercícios e recarrega a página
-    resetAllExercises();
+    // Reseta os exercícios sem pedir confirmação (apenas alterna)
+    const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+    Object.keys(exercises).forEach(group => {
+        if (Array.isArray(exercises[group])) {
+            exercises[group].forEach(ex => {
+                ex.completed = false;
+            });
+        }
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+    
+    // Sincronizar com Firebase
+    if (firebaseReady && CURRENT_USER) {
+        saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+    }
+    
+    // Recarrega o treino
     setTimeout(() => {
-        window.location.reload();
-    }, 500);
+        loadTraining();
+    }, 100);
 }
 
 function showInitialTreinoSelector() {
