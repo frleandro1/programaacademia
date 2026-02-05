@@ -490,6 +490,25 @@
                     <label>⚖️ Peso no Cadastro (kg)</label>
                     <input type="number" id="userStartWeight" placeholder="Ex: 85" step="0.1">
                 </div>
+                <div class="form-group">
+                    <label>🆔 CPF</label>
+                    <input type="text" id="userCPF" placeholder="Ex: 123.456.789-00">
+                </div>
+                <div class="form-group">
+                    <label>🏠 Endereço</label>
+                    <input type="text" id="userAddress" placeholder="Ex: Rua A, nº 123, Apt 456">
+                </div>
+                <div class="form-group">
+                    <label>💳 Forma de Pagamento</label>
+                    <select id="userPaymentMethod">
+                        <option value="">Selecione...</option>
+                        <option value="credit-card">💳 Cartão de Crédito</option>
+                        <option value="debit-card">🏦 Cartão de Débito</option>
+                        <option value="pix">📱 PIX</option>
+                        <option value="boleto">📄 Boleto</option>
+                        <option value="cash">💵 Dinheiro</option>
+                    </select>
+                </div>
                 <button type="submit" class="btn-primary">Salvar Usuário</button>
             </form>
         </div>
@@ -688,6 +707,9 @@
                         <p>Objetivo: ${user.goal}</p>
                         ${user.currentWeight ? `<p>⚖️ Peso Atual: ${user.currentWeight}kg</p>` : ''}
                         ${user.startWeight ? `<p>⚖️ Peso Cadastro: ${user.startWeight}kg</p>` : ''}
+                        ${user.cpf ? `<p>🆔 CPF: ${user.cpf}</p>` : ''}
+                        ${user.address ? `<p>🏠 Endereço: ${user.address}</p>` : ''}
+                        ${user.paymentMethod ? `<p>💳 Pagamento: ${getPaymentMethodName(user.paymentMethod)}</p>` : ''}
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
                         <button onclick="editUserData('${username}')" style="flex: 1; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
@@ -773,6 +795,28 @@
                             <label for="editUserStartWeight">⚖️ Peso no Cadastro (kg):</label>
                             <input type="number" id="editUserStartWeight" value="${user.startWeight || ''}" step="0.1" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
                         </div>
+
+                        <div class="form-group">
+                            <label for="editUserCPF">🆔 CPF:</label>
+                            <input type="text" id="editUserCPF" value="${user.cpf || ''}" placeholder="Ex: 123.456.789-00" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editUserAddress">🏠 Endereço:</label>
+                            <input type="text" id="editUserAddress" value="${user.address || ''}" placeholder="Ex: Rua A, nº 123, Apt 456" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editUserPaymentMethod">💳 Forma de Pagamento:</label>
+                            <select id="editUserPaymentMethod" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                                <option value="">Selecione...</option>
+                                <option value="credit-card" ${user.paymentMethod === 'credit-card' ? 'selected' : ''}>💳 Cartão de Crédito</option>
+                                <option value="debit-card" ${user.paymentMethod === 'debit-card' ? 'selected' : ''}>🏦 Cartão de Débito</option>
+                                <option value="pix" ${user.paymentMethod === 'pix' ? 'selected' : ''}>📱 PIX</option>
+                                <option value="boleto" ${user.paymentMethod === 'boleto' ? 'selected' : ''}>📄 Boleto</option>
+                                <option value="cash" ${user.paymentMethod === 'cash' ? 'selected' : ''}>💵 Dinheiro</option>
+                            </select>
+                        </div>
                         
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
                             <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
@@ -810,6 +854,9 @@
             const status = document.getElementById('editUserStatus').value;
             const currentWeight = document.getElementById('editUserCurrentWeight').value;
             const startWeight = document.getElementById('editUserStartWeight').value;
+            const cpf = document.getElementById('editUserCPF').value;
+            const address = document.getElementById('editUserAddress').value;
+            const paymentMethod = document.getElementById('editUserPaymentMethod').value;
             
             if (!name) {
                 showError('⚠️ Nome não pode estar vazio');
@@ -823,6 +870,9 @@
             allUsers[username].status = status;
             if (currentWeight) allUsers[username].currentWeight = parseFloat(currentWeight);
             if (startWeight) allUsers[username].startWeight = parseFloat(startWeight);
+            allUsers[username].cpf = cpf || null;
+            allUsers[username].address = address || null;
+            allUsers[username].paymentMethod = paymentMethod || null;
             
             // Salvar em localStorage
             localStorage.setItem('allUsers', JSON.stringify(allUsers));
@@ -1049,6 +1099,17 @@
             document.getElementById('userGoal').value = '';
         }
 
+        function getPaymentMethodName(method) {
+            const methods = {
+                'credit-card': '💳 Cartão de Crédito',
+                'debit-card': '🏦 Cartão de Débito',
+                'pix': '📱 PIX',
+                'boleto': '📄 Boleto',
+                'cash': '💵 Dinheiro'
+            };
+            return methods[method] || method;
+        }
+
         function saveUser(event) {
             event.preventDefault();
             console.log('📝 Tentando salvar novo usuário...');
@@ -1060,12 +1121,15 @@
             const goal = document.getElementById('userGoal').value;
             const currentWeight = document.getElementById('userCurrentWeight').value;
             const startWeight = document.getElementById('userStartWeight').value;
+            const cpf = document.getElementById('userCPF').value;
+            const address = document.getElementById('userAddress').value;
+            const paymentMethod = document.getElementById('userPaymentMethod').value;
 
-            console.log('Dados coletados:', { name, username, password, routine, goal, currentWeight, startWeight });
+            console.log('Dados coletados:', { name, username, password, routine, goal, currentWeight, startWeight, cpf, address, paymentMethod });
 
             // Validações
             if (!name || !username || !password || !routine || !goal) {
-                alert('❌ Preencha todos os campos!');
+                alert('❌ Preencha todos os campos obrigatórios!');
                 console.error('❌ Campos faltando:', { name, username, password, routine, goal });
                 return;
             }
@@ -1086,6 +1150,9 @@
                     goal,
                     currentWeight: currentWeight ? parseFloat(currentWeight) : null,
                     startWeight: startWeight ? parseFloat(startWeight) : null,
+                    cpf: cpf || null,
+                    address: address || null,
+                    paymentMethod: paymentMethod || null,
                     registrationDate: new Date().toISOString()
                 };
                 console.log('✅ Novo usuário criado:', newUser);

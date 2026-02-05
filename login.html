@@ -424,6 +424,28 @@
                         <input type="number" id="regWeightStart" placeholder="Ex: 85" step="0.1" required>
                     </div>
 
+                    <div class="form-group">
+                        <label for="regCPF">🆔 CPF</label>
+                        <input type="text" id="regCPF" placeholder="Ex: 123.456.789-00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regAddress">🏠 Endereço</label>
+                        <input type="text" id="regAddress" placeholder="Ex: Rua A, nº 123, Apt 456">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPaymentMethod">💳 Forma de Pagamento</label>
+                        <select id="regPaymentMethod" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1em;">
+                            <option value="">Selecione...</option>
+                            <option value="credit-card">💳 Cartão de Crédito</option>
+                            <option value="debit-card">🏦 Cartão de Débito</option>
+                            <option value="pix">📱 PIX</option>
+                            <option value="boleto">📄 Boleto</option>
+                            <option value="cash">💵 Dinheiro</option>
+                        </select>
+                    </div>
+
                     <button type="submit" class="btn-login" style="background: #4caf50;">Criar Conta</button>
                 </form>
 
@@ -441,6 +463,9 @@
             const confirm = document.getElementById('regConfirm').value;
             const currentWeight = parseFloat(document.getElementById('regWeight').value);
             const startWeight = parseFloat(document.getElementById('regWeightStart').value);
+            const cpf = document.getElementById('regCPF').value;
+            const address = document.getElementById('regAddress').value;
+            const paymentMethod = document.getElementById('regPaymentMethod').value;
             const errorDiv = document.getElementById('errorMessage');
 
             if (password !== confirm) {
@@ -464,6 +489,9 @@
                 goal: 'Saúde',
                 currentWeight: currentWeight,
                 startWeight: startWeight,
+                cpf: cpf,
+                address: address,
+                paymentMethod: paymentMethod,
                 registrationDate: new Date().toISOString()
             };
 
@@ -477,6 +505,9 @@
                 console.log(`✅ Novo usuário criado: ${username}`);
                 console.log(`⚖️ Peso Atual: ${currentWeight}kg`);
                 console.log(`⚖️ Peso no Cadastro: ${startWeight}kg`);
+                console.log(`🆔 CPF: ${cpf}`);
+                console.log(`🏠 Endereço: ${address}`);
+                console.log(`💳 Forma de Pagamento: ${paymentMethod}`);
 
                 alert(`✅ Conta criada com sucesso, ${name}!\n\nPeso Atual: ${currentWeight}kg\nPeso no Cadastro: ${startWeight}kg\n\nVocê já pode fazer login.`);
                 showLoginForm(e);
