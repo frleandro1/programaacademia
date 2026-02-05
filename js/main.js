@@ -57,8 +57,11 @@ function handleLogout() {
         }
         
         console.log('📤 Redirecionando para login...');
-        window.location.href = './login.html';
+        setTimeout(() => {
+            window.location.href = './login.html';
+        }, 300);
     }
+    return false;
 }
 
 // ============ INICIALIZAÇÃO FIREBASE ============
