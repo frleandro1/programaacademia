@@ -745,10 +745,21 @@
                                 <option value="weight-loss" ${user.goal === 'weight-loss' ? 'selected' : ''}>Perda de Peso</option>
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label for="editUserStatus">Status de Pagamento:</label>
+                            <select id="editUserStatus" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                                <option value="active" ${user.status === 'active' ? 'selected' : ''}>✅ Ativo (Pagamento em dia)</option>
+                                <option value="blocked" ${user.status === 'blocked' ? 'selected' : ''}>🚫 Bloqueado (Falta pagamento)</option>
+                            </select>
+                        </div>
                         
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
                             <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
                                 💾 Salvar Alterações
+                            </button>
+                            <button type="button" onclick="editUserPassword('${username}')" class="btn-secondary" style="flex: 1; padding: 12px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                🔐 Trocar Senha
                             </button>
                             <button type="button" onclick="closeEditUserModal()" class="btn-secondary" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
                                 Cancelar
@@ -776,6 +787,7 @@
             const name = document.getElementById('editUserName').value.trim();
             const routine = document.getElementById('editUserRoutine').value;
             const goal = document.getElementById('editUserGoal').value;
+            const status = document.getElementById('editUserStatus').value;
             
             if (!name) {
                 showError('⚠️ Nome não pode estar vazio');
@@ -786,6 +798,7 @@
             allUsers[username].name = name;
             allUsers[username].routine = routine;
             allUsers[username].goal = goal;
+            allUsers[username].status = status;
             
             // Salvar em localStorage
             localStorage.setItem('allUsers', JSON.stringify(allUsers));
@@ -800,6 +813,9 @@
         }
 
         function editUserPassword(username) {
+            const user = allUsers[username];
+            if (!user) return;
+
             const modal = document.createElement('div');
             modal.id = 'editPasswordModal';
             modal.style.cssText = `
@@ -820,15 +836,10 @@
             modal.innerHTML = `
                 <div style="position: relative;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ff6b6b; padding-bottom: 10px;">
-                        <h2 style="margin: 0; color: #333;">🔐 Alterar Senha</h2>
+                        <h2 style="margin: 0; color: #333;">🔐 Trocar Senha de ${user.name}</h2>
                         <button onclick="closeEditPasswordModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
                     </div>
-                    <form id="editPasswordForm" onsubmit="saveNewPassword(event, '${username}')">
-                        <div class="form-group">
-                            <label for="currentPassword">Senha Atual:</label>
-                            <input type="password" id="currentPassword" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
-                        </div>
-                        
+                    <form id="editPasswordForm" onsubmit="saveAdminPassword(event, '${username}')">
                         <div class="form-group">
                             <label for="newPassword">Nova Senha:</label>
                             <input type="password" id="newPassword" required minlength="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;" placeholder="Mínimo 6 caracteres">
@@ -838,10 +849,14 @@
                             <label for="confirmPassword">Confirmar Senha:</label>
                             <input type="password" id="confirmPassword" required minlength="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
                         </div>
+
+                        <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 0.9em; color: #856404;">
+                            ⚠️ Admin: Você está alterando a senha de outro usuário.
+                        </div>
                         
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
-                            <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                                🔐 Alterar Senha
+                            <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                💾 Salvar Nova Senha
                             </button>
                             <button type="button" onclick="closeEditPasswordModal()" class="btn-secondary" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
                                 Cancelar
@@ -861,6 +876,32 @@
                 modal.classList.remove('active');
                 setTimeout(() => modal.remove(), 300);
             }
+        }
+
+        function saveAdminPassword(event, username) {
+            event.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showError('❌ As senhas não coincidem!');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showError('❌ Senha deve ter no mínimo 6 caracteres');
+                return;
+            }
+
+            // Atualizar a senha do usuário
+            allUsers[username].password = newPassword;
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+
+            // Sincronizar com Firebase
+            saveUserToFirebase(username, allUsers[username]);
+
+            showSuccess(`✅ Senha de ${allUsers[username].name} alterada com sucesso!`);
+            closeEditPasswordModal();
         }
 
         function saveNewPassword(event, username) {
