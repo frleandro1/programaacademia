@@ -1238,7 +1238,7 @@ function checkIfWorkoutComplete(exercises) {
 }
 
 function showWorkoutSummary(exercises) {
-    const customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.name}`)) || {};
+    const customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.username}`)) || {};
     
     // Calcula dados do treino
     const trainingStats = calculateTrainingStats(exercises, customTraining);
@@ -1418,32 +1418,58 @@ function closeSummary() {
 }
 
 function sendNotification(exercises) {
-    // Calcula estatísticas
-    const customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.name}`)) || {};
-    const trainingStats = calculateTrainingStats(exercises, customTraining);
-    
-    // Tenta enviar notificação do navegador (Web Push API)
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('🎉 Treino Finalizado!', {
-            body: `Parabéns ${CURRENT_USER.name}! 💪\n⏱️ Tempo: ${trainingStats.time}\n🏋️ Carga: ${trainingStats.totalLoad}`,
-            icon: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext x=%2250%22 y=%2265%22 font-size=%2270%22 text-anchor=%22middle%22%3E🎉%3C/text%3E%3C/svg%3E',
-            tag: 'workout-complete',
-            requireInteraction: false
-        });
-        console.log('📲 Notificação enviada ao navegador');
-    } else if ('Notification' in window && Notification.permission !== 'denied') {
-        // Pedir permissão se ainda não foi solicitada
-        Notification.requestPermission();
+    try {
+        // Calcula estatísticas
+        const customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.username}`)) || {};
+        const trainingStats = calculateTrainingStats(exercises, customTraining);
+        
+        console.log('📢 Tentando enviar notificação...');
+        
+        // Tenta enviar notificação do navegador (Web Push API)
+        if ('Notification' in window) {
+            if (Notification.permission === 'granted') {
+                try {
+                    new Notification('🎉 Treino Finalizado!', {
+                        body: `Parabéns! 💪\n⏱️ Tempo: ${trainingStats.time}\n🏋️ Carga: ${trainingStats.totalLoad}`,
+                        tag: 'workout-complete',
+                        requireInteraction: false
+                    });
+                    console.log('✅ Notificação do navegador enviada');
+                } catch (notifError) {
+                    console.warn('⚠️ Erro ao criar notificação:', notifError);
+                }
+            } else if (Notification.permission !== 'denied') {
+                console.log('❓ Solicitando permissão para notificações...');
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification('🎉 Treino Finalizado!', {
+                            body: `Parabéns! 💪\n⏱️ Tempo: ${trainingStats.time}\n🏋️ Carga: ${trainingStats.totalLoad}`,
+                            tag: 'workout-complete',
+                            requireInteraction: false
+                        });
+                        console.log('✅ Notificação do navegador enviada após permissão');
+                    }
+                });
+            }
+        }
+        
+        // Reproduzir som de sucesso (se disponível)
+        playSuccessSound();
+    } catch (error) {
+        console.error('❌ Erro na função sendNotification:', error);
     }
-    
-    // Reproduzir som de sucesso (se disponível)
-    playSuccessSound();
 }
 
 function playSuccessSound() {
     try {
         // Criar som de sucesso usando Web Audio API
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) {
+            console.warn('⚠️ Web Audio API não suportada');
+            return;
+        }
+        
+        const audioContext = new AudioContext();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         
@@ -1458,6 +1484,7 @@ function playSuccessSound() {
         ];
         
         let time = audioContext.currentTime;
+        gainNode.gain.setValueAtTime(0, time);
         
         notes.forEach(note => {
             oscillator.frequency.setValueAtTime(note.freq, time);
@@ -1469,42 +1496,51 @@ function playSuccessSound() {
         oscillator.start(audioContext.currentTime);
         oscillator.stop(time);
         
-        console.log('🔊 Som de sucesso reproduzido');
+        console.log('✅ Som de sucesso reproduzido');
     } catch (error) {
         console.warn('⚠️ Não foi possível reproduzir som:', error);
     }
 }
 
 function saveWorkoutCompletion(trainingStats) {
-    const today = new Date().toISOString().split('T')[0];
-    const completionsKey = `workout_completions_${CURRENT_USER.name}`;
-    
-    // Carregar completações anteriores
-    let completions = JSON.parse(localStorage.getItem(completionsKey)) || [];
-    
-    // Adicionar conclusão de hoje
-    completions.push({
-        date: today,
-        time: new Date().toISOString(),
-        stats: trainingStats,
-        selectedTreino: localStorage.getItem('selectedTreino')
-    });
-    
-    // Salvar no localStorage
-    localStorage.setItem(completionsKey, JSON.stringify(completions));
-    
-    // Salvar no Firebase também
-    if (firebaseReady && CURRENT_USER) {
-        const historyPath = `users/${CURRENT_USER.username}/workout_history/${today}`;
-        saveToFirebase(historyPath, {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const completionsKey = `workout_completions_${CURRENT_USER.username}`;
+        
+        // Carregar completações anteriores
+        let completions = JSON.parse(localStorage.getItem(completionsKey)) || [];
+        
+        // Adicionar conclusão de hoje
+        completions.push({
+            date: today,
             time: new Date().toISOString(),
             stats: trainingStats,
             selectedTreino: localStorage.getItem('selectedTreino')
         });
-        console.log(`📤 Conclusão do treino salva no Firebase`);
+        
+        // Salvar no localStorage
+        localStorage.setItem(completionsKey, JSON.stringify(completions));
+        console.log(`💾 Treino salvo no localStorage`);
+        
+        // Salvar no Firebase também
+        if (firebaseReady && CURRENT_USER && CURRENT_USER.username) {
+            try {
+                const historyPath = `users/${CURRENT_USER.username}/workout_history/${today}`;
+                saveToFirebase(historyPath, {
+                    time: new Date().toISOString(),
+                    stats: trainingStats,
+                    selectedTreino: localStorage.getItem('selectedTreino')
+                });
+                console.log(`📤 Treino salvo no Firebase: ${historyPath}`);
+            } catch (firebaseError) {
+                console.warn(`⚠️ Erro ao salvar no Firebase:`, firebaseError);
+            }
+        }
+        
+        console.log(`✅ Treino completado salvo para ${today}`);
+    } catch (error) {
+        console.error('❌ Erro em saveWorkoutCompletion:', error);
     }
-    
-    console.log(`✅ Treino completado salvo para ${today}`);
 }
 
 function finishSummary() {
