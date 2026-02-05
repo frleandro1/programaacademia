@@ -1235,12 +1235,43 @@ function checkIfWorkoutComplete(exercises) {
     
     // Se todos os exercícios foram concluídos
     if (totalExercises > 0 && completedExercises === totalExercises) {
-        console.log(`🎉 TREINO COMPLETO! Mostrando resumo...`);
-        setTimeout(() => {
-            showWorkoutSummary(exercises);
-            sendNotification(exercises);
-        }, 500);
+        console.log(`🎉 TREINO COMPLETO! Mostrando botão de finalização...`);
+        showFinishButton(exercises);
+    } else {
+        // Se não completou todos, remove o botão se houver
+        const finishBtn = document.getElementById('finish-workout-btn');
+        if (finishBtn) finishBtn.remove();
     }
+}
+
+function showFinishButton(exercises) {
+    // Remove botão anterior se existir
+    const existingBtn = document.getElementById('finish-workout-btn');
+    if (existingBtn) existingBtn.remove();
+    
+    // Cria botão flutuante de conclusão
+    const button = document.createElement('button');
+    button.id = 'finish-workout-btn';
+    button.className = 'finish-workout-button';
+    button.innerHTML = `
+        <div class="finish-btn-content">
+            <span class="finish-icon">🎉</span>
+            <div class="finish-text">
+                <strong>Parabéns!</strong>
+                <small>Todos os exercícios completos</small>
+            </div>
+        </div>
+    `;
+    
+    button.onclick = () => {
+        showWorkoutSummary(exercises);
+        sendNotification(exercises);
+    };
+    
+    document.body.appendChild(button);
+    
+    // Animação de entrada
+    setTimeout(() => button.classList.add('show'), 100);
 }
 
 function showWorkoutSummary(exercises) {
