@@ -1438,8 +1438,6 @@ function switchTreino(treino) {
         loadTraining();
     }, 100);
 }
-    }, 100);
-}
 
 function showInitialTreinoSelector() {
     // Cria um modal de seleção inicial de treino (após login)
