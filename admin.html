@@ -482,6 +482,14 @@
                     <label>Objetivo</label>
                     <input type="text" id="userGoal" placeholder="Ex: Ganho de Massa">
                 </div>
+                <div class="form-group">
+                    <label>⚖️ Peso Atual (kg)</label>
+                    <input type="number" id="userCurrentWeight" placeholder="Ex: 80" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>⚖️ Peso no Cadastro (kg)</label>
+                    <input type="number" id="userStartWeight" placeholder="Ex: 85" step="0.1">
+                </div>
                 <button type="submit" class="btn-primary">Salvar Usuário</button>
             </form>
         </div>
@@ -678,6 +686,8 @@
                         <p>Usuário: ${username}</p>
                         <p>Rotina: ${user.routine}</p>
                         <p>Objetivo: ${user.goal}</p>
+                        ${user.currentWeight ? `<p>⚖️ Peso Atual: ${user.currentWeight}kg</p>` : ''}
+                        ${user.startWeight ? `<p>⚖️ Peso Cadastro: ${user.startWeight}kg</p>` : ''}
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
                         <button onclick="editUserData('${username}')" style="flex: 1; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
@@ -753,6 +763,16 @@
                                 <option value="blocked" ${user.status === 'blocked' ? 'selected' : ''}>🚫 Bloqueado (Falta pagamento)</option>
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label for="editUserCurrentWeight">⚖️ Peso Atual (kg):</label>
+                            <input type="number" id="editUserCurrentWeight" value="${user.currentWeight || ''}" step="0.1" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editUserStartWeight">⚖️ Peso no Cadastro (kg):</label>
+                            <input type="number" id="editUserStartWeight" value="${user.startWeight || ''}" step="0.1" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; box-sizing: border-box;">
+                        </div>
                         
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
                             <button type="submit" class="btn-primary" style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
@@ -788,6 +808,8 @@
             const routine = document.getElementById('editUserRoutine').value;
             const goal = document.getElementById('editUserGoal').value;
             const status = document.getElementById('editUserStatus').value;
+            const currentWeight = document.getElementById('editUserCurrentWeight').value;
+            const startWeight = document.getElementById('editUserStartWeight').value;
             
             if (!name) {
                 showError('⚠️ Nome não pode estar vazio');
@@ -799,6 +821,8 @@
             allUsers[username].routine = routine;
             allUsers[username].goal = goal;
             allUsers[username].status = status;
+            if (currentWeight) allUsers[username].currentWeight = parseFloat(currentWeight);
+            if (startWeight) allUsers[username].startWeight = parseFloat(startWeight);
             
             // Salvar em localStorage
             localStorage.setItem('allUsers', JSON.stringify(allUsers));
@@ -1034,8 +1058,10 @@
             const password = document.getElementById('userPassword').value;
             const routine = document.getElementById('userRoutine').value;
             const goal = document.getElementById('userGoal').value;
+            const currentWeight = document.getElementById('userCurrentWeight').value;
+            const startWeight = document.getElementById('userStartWeight').value;
 
-            console.log('Dados coletados:', { name, username, password, routine, goal });
+            console.log('Dados coletados:', { name, username, password, routine, goal, currentWeight, startWeight });
 
             // Validações
             if (!name || !username || !password || !routine || !goal) {
@@ -1052,7 +1078,16 @@
 
             try {
                 const newId = Math.max(...Object.values(allUsers).map(u => u.id), 0) + 1;
-                const newUser = { name, password, id: newId, routine, goal };
+                const newUser = { 
+                    name, 
+                    password, 
+                    id: newId, 
+                    routine, 
+                    goal,
+                    currentWeight: currentWeight ? parseFloat(currentWeight) : null,
+                    startWeight: startWeight ? parseFloat(startWeight) : null,
+                    registrationDate: new Date().toISOString()
+                };
                 console.log('✅ Novo usuário criado:', newUser);
                 
                 allUsers[username] = newUser;
