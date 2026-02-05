@@ -144,7 +144,7 @@ function initializeFirebase() {
 function syncFirebaseData() {
     if (!firebaseReady || !CURRENT_USER) return;
     
-    const username = CURRENT_USER.name;
+    const username = CURRENT_USER.username;
     
     // Sincronizar treino (exercícios)
     const training = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
@@ -812,7 +812,7 @@ function renderizarTreino(exercises) {
                 if (ex.completed) completedExercises++;
 
                 // Carrega personalizações customizadas do admin
-                let customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.name}`)) || {};
+                let customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.username}`)) || {};
                 let displaySeries = customTraining[ex.id] ? customTraining[ex.id].series : ex.series;
                 let displayLoad = customTraining[ex.id] ? customTraining[ex.id].load : ex.load;
 
@@ -916,7 +916,7 @@ function saveLoad(exerciseId) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
         // Sincronizar com Firebase
         if (firebaseReady && CURRENT_USER) {
-            saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+            saveToFirebase(`trainings/${CURRENT_USER.username}`, exercises);
         }
     }
 }
@@ -939,7 +939,7 @@ function increaseLoad(exerciseId) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
         // Sincronizar com Firebase
         if (firebaseReady && CURRENT_USER) {
-            saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+            saveToFirebase(`trainings/${CURRENT_USER.username}`, exercises);
         }
     }
 }
@@ -964,7 +964,7 @@ function decreaseLoad(exerciseId) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
         // Sincronizar com Firebase
         if (firebaseReady && CURRENT_USER) {
-            saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+            saveToFirebase(`trainings/${CURRENT_USER.username}`, exercises);
         }
     }
 }
@@ -1035,8 +1035,8 @@ function toggleComplete(event, group, id) {
             
             // Sincronizar com Firebase
             if (firebaseReady) {
-                console.log(`📤 Sincronizando com Firebase: trainings/${CURRENT_USER.name}`);
-                saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+                console.log(`📤 Sincronizando com Firebase: trainings/${CURRENT_USER.username}`);
+                saveToFirebase(`trainings/${CURRENT_USER.username}`, exercises);
             }
         }
         
@@ -1143,7 +1143,7 @@ function showVideoModal(videoPath) {
 // ============ FUNÇÕES DE TIMER DE TREINO ============
 
 function startTrainingTimer() {
-    const storageKey = `training_session_${CURRENT_USER.name}`;
+    const storageKey = `training_session_${CURRENT_USER.username}`;
     const today = new Date().toDateString();
     
     // Verifica se já existe uma sessão hoje
@@ -1177,7 +1177,7 @@ function startTrainingTimer() {
             
             // Sincroniza com Firebase
             if (firebaseReady && USE_FIREBASE) {
-                saveToFirebase(`sessions/${CURRENT_USER.name}/current`, {
+                saveToFirebase(`sessions/${CURRENT_USER.username}/current`, {
                     date: today,
                     elapsedSeconds: totalSeconds,
                     timestamp: Date.now()
@@ -1252,7 +1252,7 @@ function showWorkoutSummary(exercises) {
                 <button class="close-summary" onclick="closeSummary()">✕</button>
                 
                 <div class="summary-header">
-                    <h1>🎉 Parabéns, ${CURRENT_USER.name}!</h1>
+                    <h1>🎉 Parabéns, ${CURRENT_USER.username}!</h1>
                     <p>Treino Finalizado com Sucesso! 💪</p>
                 </div>
                 
@@ -1362,7 +1362,7 @@ function calculateTrainingStats(exercises, customTraining) {
 }
 
 function getWeekTrainingStats() {
-    const storageKey = `training_session_${CURRENT_USER.name}`;
+    const storageKey = `training_session_${CURRENT_USER.username}`;
     const today = new Date();
     const weekDays = {};
     let trainingDays = 0;
@@ -1548,11 +1548,11 @@ function finishSummary() {
     
     // Salva a sessão completada no Firebase
     if (firebaseReady && USE_FIREBASE && CURRENT_USER) {
-        const storageKey = `training_session_${CURRENT_USER.name}`;
+        const storageKey = `training_session_${CURRENT_USER.username}`;
         const sessionData = JSON.parse(localStorage.getItem(storageKey)) || {};
         
         // Salva no histórico de sessões
-        const historyKey = `sessions/${CURRENT_USER.name}/${new Date().toISOString().split('T')[0]}`;
+        const historyKey = `sessions/${CURRENT_USER.username}/${new Date().toISOString().split('T')[0]}`;
         saveToFirebase(historyKey, {
             ...sessionData,
             completedAt: new Date().toISOString(),
@@ -1669,7 +1669,7 @@ function switchTreino(treino) {
     
     // Sincronizar com Firebase
     if (firebaseReady && CURRENT_USER) {
-        saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+        saveToFirebase(`trainings/${CURRENT_USER.username}`, exercises);
     }
     
     console.log(`📚 Recarregando treino ${treino}`);
