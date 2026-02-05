@@ -1225,21 +1225,26 @@ function checkIfWorkoutComplete(exercises) {
         }
     });
     
+    console.log(`✅ Exercícios concluídos: ${completedExercises}/${totalExercises}`);
+    
     // Se todos os exercícios foram concluídos
     if (totalExercises > 0 && completedExercises === totalExercises) {
+        console.log(`🎉 TREINO COMPLETO! Mostrando resumo...`);
         setTimeout(() => {
-            showWorkoutSummary();
+            showWorkoutSummary(exercises);
+            sendNotification(exercises);
         }, 500);
     }
 }
 
-function showWorkoutSummary() {
-    const exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+function showWorkoutSummary(exercises) {
     const customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.name}`)) || {};
     
     // Calcula dados do treino
     const trainingStats = calculateTrainingStats(exercises, customTraining);
     const weekStats = getWeekTrainingStats();
+    
+    console.log(`📊 Estatísticas do treino:`, trainingStats);
     
     const summaryHtml = `
         <div class="workout-summary-modal">
@@ -1247,8 +1252,8 @@ function showWorkoutSummary() {
                 <button class="close-summary" onclick="closeSummary()">✕</button>
                 
                 <div class="summary-header">
-                    <h1>🎉 Parabéns!</h1>
-                    <p>Treino Concluído com Sucesso</p>
+                    <h1>🎉 Parabéns, ${CURRENT_USER.name}!</h1>
+                    <p>Treino Finalizado com Sucesso! 💪</p>
                 </div>
                 
                 <div class="summary-body">
@@ -1258,7 +1263,7 @@ function showWorkoutSummary() {
                             <div class="stat-item">
                                 <div class="stat-icon">✓</div>
                                 <div class="stat-info">
-                                    <span class="stat-label">Exercícios</span>
+                                    <span class="stat-label">Exercícios Concluídos</span>
                                     <span class="stat-value">${trainingStats.totalExercises}</span>
                                 </div>
                             </div>
@@ -1274,10 +1279,19 @@ function showWorkoutSummary() {
                             <div class="stat-item">
                                 <div class="stat-icon">🏋️</div>
                                 <div class="stat-info">
-                                    <span class="stat-label">Carga Total</span>
+                                    <span class="stat-label">Carga Total Movimentada</span>
                                     <span class="stat-value">${trainingStats.totalLoad}</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h2>📈 Desempenho</h2>
+                        <div class="performance-message">
+                            <p style="font-size: 1.1em; text-align: center; color: #4caf50; margin: 20px 0;">
+                                ✨ Excelente trabalho! Continue assim e alcance seus objetivos! 💪
+                            </p>
                         </div>
                     </div>
                     
@@ -1295,7 +1309,7 @@ function showWorkoutSummary() {
                     </div>
                     
                     <div class="summary-actions">
-                        <button class="btn-finish" onclick="finishSummary()">Finalizar</button>
+                        <button class="btn-finish" onclick="finishSummary()" style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); padding: 15px 30px; font-size: 1.1em;">✅ Finalizar Treino</button>
                     </div>
                 </div>
             </div>
@@ -1307,6 +1321,12 @@ function showWorkoutSummary() {
     if (oldModal) oldModal.remove();
     
     document.body.innerHTML += summaryHtml;
+    
+    // Salvar que o treino foi completado
+    saveWorkoutCompletion(trainingStats);
+    
+    // Enviar notificação ao navegador
+    sendNotification(exercises);
 }
 
 function calculateTrainingStats(exercises, customTraining) {
@@ -1395,6 +1415,96 @@ function generateWeekChart(dailyTrainings) {
 function closeSummary() {
     const modal = document.querySelector('.workout-summary-modal');
     if (modal) modal.remove();
+}
+
+function sendNotification(exercises) {
+    // Calcula estatísticas
+    const customTraining = JSON.parse(localStorage.getItem(`custom_training_${CURRENT_USER.name}`)) || {};
+    const trainingStats = calculateTrainingStats(exercises, customTraining);
+    
+    // Tenta enviar notificação do navegador (Web Push API)
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🎉 Treino Finalizado!', {
+            body: `Parabéns ${CURRENT_USER.name}! 💪\n⏱️ Tempo: ${trainingStats.time}\n🏋️ Carga: ${trainingStats.totalLoad}`,
+            icon: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext x=%2250%22 y=%2265%22 font-size=%2270%22 text-anchor=%22middle%22%3E🎉%3C/text%3E%3C/svg%3E',
+            tag: 'workout-complete',
+            requireInteraction: false
+        });
+        console.log('📲 Notificação enviada ao navegador');
+    } else if ('Notification' in window && Notification.permission !== 'denied') {
+        // Pedir permissão se ainda não foi solicitada
+        Notification.requestPermission();
+    }
+    
+    // Reproduzir som de sucesso (se disponível)
+    playSuccessSound();
+}
+
+function playSuccessSound() {
+    try {
+        // Criar som de sucesso usando Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Notas musicais para um som alegre
+        const notes = [
+            { freq: 523.25, duration: 0.1 },  // C5
+            { freq: 659.25, duration: 0.1 },  // E5
+            { freq: 783.99, duration: 0.3 }   // G5
+        ];
+        
+        let time = audioContext.currentTime;
+        
+        notes.forEach(note => {
+            oscillator.frequency.setValueAtTime(note.freq, time);
+            gainNode.gain.setValueAtTime(0.3, time);
+            gainNode.gain.setValueAtTime(0, time + note.duration);
+            time += note.duration;
+        });
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(time);
+        
+        console.log('🔊 Som de sucesso reproduzido');
+    } catch (error) {
+        console.warn('⚠️ Não foi possível reproduzir som:', error);
+    }
+}
+
+function saveWorkoutCompletion(trainingStats) {
+    const today = new Date().toISOString().split('T')[0];
+    const completionsKey = `workout_completions_${CURRENT_USER.name}`;
+    
+    // Carregar completações anteriores
+    let completions = JSON.parse(localStorage.getItem(completionsKey)) || [];
+    
+    // Adicionar conclusão de hoje
+    completions.push({
+        date: today,
+        time: new Date().toISOString(),
+        stats: trainingStats,
+        selectedTreino: localStorage.getItem('selectedTreino')
+    });
+    
+    // Salvar no localStorage
+    localStorage.setItem(completionsKey, JSON.stringify(completions));
+    
+    // Salvar no Firebase também
+    if (firebaseReady && CURRENT_USER) {
+        const historyPath = `users/${CURRENT_USER.username}/workout_history/${today}`;
+        saveToFirebase(historyPath, {
+            time: new Date().toISOString(),
+            stats: trainingStats,
+            selectedTreino: localStorage.getItem('selectedTreino')
+        });
+        console.log(`📤 Conclusão do treino salva no Firebase`);
+    }
+    
+    console.log(`✅ Treino completado salvo para ${today}`);
 }
 
 function finishSummary() {
