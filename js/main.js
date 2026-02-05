@@ -785,7 +785,7 @@ function renderizarTreino(exercises) {
                     <div class="exercise-card ${ex.completed ? 'completed' : ''}">
                         <div class="exercise-content">
                             <div class="exercise-header">
-                                <input type="checkbox" class="exercise-checkbox" ${ex.completed ? 'checked' : ''} onchange="toggleComplete('${group}', ${ex.id})">
+                                <input type="checkbox" class="exercise-checkbox" ${ex.completed ? 'checked' : ''} onchange="toggleComplete(event, '${group}', ${ex.id})">
                                 <h3 class="exercise-title">${escapeHtml(ex.name)}</h3>
                             </div>
                             <div class="exercise-meta">
@@ -907,10 +907,10 @@ function decreaseLoad(exerciseId) {
     }
 }
 
-function toggleComplete(group, id) {
+function toggleComplete(event, group, id) {
+    const completed = event.target.checked;
+    
     if (USE_DATABASE) {
-        const completed = event.target.checked;
-        
         fetch(`${API_URL}?action=completar&usuario_id=${USUARIO_ID}`, {
             method: 'POST',
             headers: {
@@ -935,25 +935,44 @@ function toggleComplete(group, id) {
     } else {
         // Atualizar em ambos os localStorage: STORAGE_KEY e training_${username}
         let exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-        let userTraining = null;
         
-        if (CURRENT_USER) {
-            userTraining = JSON.parse(localStorage.getItem(`training_${CURRENT_USER.username}`)) || {};
-        }
+        console.log(`🔍 Atualizando exercício - Grupo: ${group}, ID: ${id}, Concluído: ${completed}`);
+        console.log(`📊 Exercícios antes:`, exercises[group]);
         
         // Atualizar no STORAGE_KEY (para compatibilidade)
         if (exercises[group]) {
             const ex = exercises[group].find(e => e.id === id);
             if (ex) {
-                ex.completed = !ex.completed;
+                ex.completed = completed;
+                console.log(`✅ Exercício atualizado em STORAGE_KEY:`, ex);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+            } else {
+                console.warn(`⚠️ Exercício ${id} não encontrado no grupo ${group}`);
+            }
+        } else {
+            console.warn(`⚠️ Grupo ${group} não encontrado`);
+        }
+        
+        // Atualizar também no training_${username} se existir
+        if (CURRENT_USER) {
+            let userTraining = JSON.parse(localStorage.getItem(`training_${CURRENT_USER.username}`)) || {};
+            if (userTraining[group]) {
+                const ex = userTraining[group].find(e => e.id === id);
+                if (ex) {
+                    ex.completed = completed;
+                    localStorage.setItem(`training_${CURRENT_USER.username}`, JSON.stringify(userTraining));
+                    console.log(`✅ Exercício atualizado em training_${CURRENT_USER.username}`);
+                }
+            }
+            
+            // Sincronizar com Firebase
+            if (firebaseReady) {
+                saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
+                console.log(`📤 Sincronizado com Firebase`);
             }
         }
         
-        // Sincronizar com Firebase
-        if (firebaseReady && CURRENT_USER) {
-            saveToFirebase(`trainings/${CURRENT_USER.name}`, exercises);
-        }
+        console.log(`✅ Exercício ${id} marcado como ${completed ? 'concluído' : 'não concluído'}`);
         
         // Verifica se todos os exercícios foram concluídos
         checkIfWorkoutComplete(exercises);
