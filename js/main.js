@@ -1035,19 +1035,27 @@ function toggleComplete(event, group, id) {
             
             // Sincronizar com Firebase
             if (firebaseReady) {
+                const selectedTreino = localStorage.getItem('selectedTreino');
+                
+                // Salvar todos os exercícios no caminho geral
                 console.log(`📤 Sincronizando com Firebase: trainings/${CURRENT_USER.username}`);
                 saveToFirebase(`trainings/${CURRENT_USER.username}`, exercises);
                 
-                // Também salvar o progresso diário
+                // Também salvar o progresso diário do treino específico
                 const today = new Date().toISOString().split('T')[0];
-                const progressPath = `users/${CURRENT_USER.username}/daily_progress/${today}`;
+                const progressPath = `users/${CURRENT_USER.username}/daily_progress/${today}/${selectedTreino}`;
+                const treineExercises = exercises[selectedTreino] || exercises[group] || [];
+                
                 saveToFirebase(progressPath, {
                     timestamp: Date.now(),
-                    exercises: exercises,
-                    completed: completed,
+                    selectedTreino: selectedTreino,
+                    exercises: treineExercises,
                     exerciseId: id,
-                    group: group
+                    group: group,
+                    completed: completed,
+                    exerciseName: exercises[group]?.find(ex => ex.id === id)?.name || 'Exercício desconhecido'
                 });
+                
                 console.log(`📊 Progresso salvo em Firebase: ${progressPath}`);
             }
         }
@@ -1602,18 +1610,20 @@ function saveWorkoutCompletion(trainingStats) {
         if (firebaseReady && CURRENT_USER && CURRENT_USER.username) {
             try {
                 const today = new Date().toISOString().split('T')[0];
-                const historyPath = `users/${CURRENT_USER.username}/workout_history/${today}`;
+                const selectedTreino = localStorage.getItem('selectedTreino');
                 const completionData = {
                     time: new Date().toISOString(),
                     timestamp: Date.now(),
                     stats: trainingStats,
-                    selectedTreino: localStorage.getItem('selectedTreino'),
+                    selectedTreino: selectedTreino,
                     completed: true,
                     totalExercises: trainingStats.totalExercises,
                     totalTime: trainingStats.time,
                     totalLoad: trainingStats.totalLoad
                 };
                 
+                // Salvar no histórico específico do treino
+                const historyPath = `users/${CURRENT_USER.username}/workout_history/${today}/${selectedTreino}`;
                 saveToFirebase(historyPath, completionData);
                 
                 // Também atualizar o status geral do usuário
@@ -1621,11 +1631,11 @@ function saveWorkoutCompletion(trainingStats) {
                 saveToFirebase(`${userPath}/lastWorkout`, {
                     date: today,
                     timestamp: Date.now(),
-                    treino: localStorage.getItem('selectedTreino'),
+                    treino: selectedTreino,
                     stats: trainingStats
                 });
                 
-                console.log(`📤 Treino salvo no Firebase: ${historyPath}`);
+                console.log(`📤 Treino ${selectedTreino} salvo no Firebase: ${historyPath}`);
             } catch (firebaseError) {
                 console.warn(`⚠️ Erro ao salvar no Firebase:`, firebaseError);
             }
