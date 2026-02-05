@@ -631,28 +631,54 @@ async function loadTraining() {
             
             // Reconstituir a estrutura ABCD com apenas os exercícios do usuário
             Object.entries(userExerciseIds).forEach(([grupo, exerciseIds]) => {
-                exercises[grupo] = exerciseIds.map(exId => {
-                    // Procurar em allExercises (como objeto com chaves numéricas)
-                    return allExercises[exId] || Object.values(allExercises).find(ex => ex.id === exId);
-                }).filter(Boolean);
+                if (Array.isArray(exerciseIds)) {
+                    exercises[grupo] = exerciseIds.map(exId => {
+                        // Procurar em allExercises (como objeto com chaves numéricas)
+                        return allExercises[exId] || Object.values(allExercises).find(ex => ex.id === exId);
+                    }).filter(Boolean);
+                }
             });
             
             console.log(`✅ Exercícios do usuário carregados:`, exercises);
         } else {
             // Se não houver treino específico, usar DEMO_DATA
-            exercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+            let loaded = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEMO_DATA;
+            // Garantir que tem a estrutura correta { A: [], B: [], C: [], D: [] }
+            exercises = { A: [], B: [], C: [], D: [] };
+            if (loaded.A) exercises.A = loaded.A;
+            if (loaded.B) exercises.B = loaded.B;
+            if (loaded.C) exercises.C = loaded.C;
+            if (loaded.D) exercises.D = loaded.D;
+            
+            console.log(`📚 Treino padrão carregado:`, exercises);
         }
+    }
+    
+    // Garantir que exercises sempre tenha a estrutura ABCD
+    if (!exercises || typeof exercises !== 'object') {
+        exercises = DEMO_DATA;
+        console.warn(`⚠️ Estrutura de exercícios inválida, usando DEMO_DATA`);
     }
     
     // Filtrar apenas o treino selecionado
     const selectedTreino = localStorage.getItem('selectedTreino');
-    if (selectedTreino && exercises[selectedTreino]) {
-        exercises = {
-            [selectedTreino]: exercises[selectedTreino]
-        };
-        console.log(`📅 Carregando treino ${selectedTreino} com ${exercises[selectedTreino].length} exercícios`);
-    } else if (selectedTreino) {
-        console.warn(`⚠️ Treino ${selectedTreino} não encontrado`);
+    if (selectedTreino) {
+        if (exercises[selectedTreino] && Array.isArray(exercises[selectedTreino])) {
+            exercises = {
+                [selectedTreino]: exercises[selectedTreino]
+            };
+            console.log(`📅 Carregando treino ${selectedTreino} com ${exercises[selectedTreino].length} exercícios`);
+        } else {
+            console.warn(`⚠️ Treino ${selectedTreino} não encontrado ou inválido. Usando DEMO_DATA.`);
+            exercises = DEMO_DATA;
+            if (exercises[selectedTreino]) {
+                exercises = {
+                    [selectedTreino]: exercises[selectedTreino]
+                };
+            }
+        }
+    } else {
+        console.warn(`⚠️ Nenhum treino selecionado`);
     }
     
     renderizarTreino(exercises);
