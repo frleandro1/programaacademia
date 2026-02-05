@@ -1063,11 +1063,21 @@ function toggleComplete(event, group, id) {
         // Recarregar treino para atualizar a visualização
         loadTraining().then(() => {
             // Após recarregar, busca os exercícios atualizados do localStorage
-            const updatedExercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-            console.log(`🔄 Exercícios atualizados após loadTraining:`, updatedExercises);
+            const allExercises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+            console.log(`🔄 Exercícios atualizados após loadTraining:`, allExercises);
+            
+            // Filtra apenas o treino selecionado para verificação
+            const selectedTreino = localStorage.getItem('selectedTreino');
+            console.log(`📅 Treino selecionado para verificação: ${selectedTreino}`);
+            
+            let exercisesToCheck = allExercises;
+            if (selectedTreino && allExercises[selectedTreino]) {
+                exercisesToCheck = { [selectedTreino]: allExercises[selectedTreino] };
+                console.log(`✅ Verificando apenas treino ${selectedTreino}:`, exercisesToCheck);
+            }
             
             // Verifica se todos os exercícios foram concluídos
-            checkIfWorkoutComplete(updatedExercises);
+            checkIfWorkoutComplete(exercisesToCheck);
         });
     }
 }
