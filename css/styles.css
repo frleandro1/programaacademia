@@ -231,11 +231,17 @@ body {
 }
 
 .exercise-checkbox {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     cursor: pointer;
-    margin-top: 3px;
+    margin-top: 0;
     flex-shrink: 0;
+    accent-color: #4caf50;
+    min-width: 22px;
+    min-height: 22px;
+    -webkit-appearance: auto;
+    appearance: auto;
+    padding: 2px;
 }
 
 .exercise-title {
@@ -539,12 +545,37 @@ body {
     }
 
     .dashboard-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-columns: 1fr !important;
         gap: 10px;
+        margin-bottom: 15px;
+        overflow-x: auto;
+    }
+
+    .dashboard-card {
+        padding: 15px 20px;
+        gap: 15px;
+        min-width: 100%;
+    }
+
+    .dashboard-icon {
+        font-size: 1.8em;
+        width: 40px;
+        height: 40px;
     }
 
     .dashboard-value {
         font-size: 1.3em;
+    }
+
+    .dashboard-label {
+        font-size: 0.7em;
+    }
+
+    .exercise-checkbox {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        min-height: 24px;
     }
 }
 
