@@ -1032,10 +1032,10 @@ function toggleComplete(event, group, id) {
                     updateCount++;
                 }
             }
-            
             // Sincronizar com Firebase
             if (firebaseReady) {
                 const selectedTreino = localStorage.getItem('selectedTreino');
+                const isMobile = window.innerWidth <= 768;
                 
                 // Salvar todos os exercícios no caminho geral
                 console.log(`📤 Sincronizando com Firebase: trainings/${CURRENT_USER.username}`);
@@ -1053,10 +1053,12 @@ function toggleComplete(event, group, id) {
                     exerciseId: id,
                     group: group,
                     completed: completed,
-                    exerciseName: exercises[group]?.find(ex => ex.id === id)?.name || 'Exercício desconhecido'
+                    exerciseName: exercises[group]?.find(ex => ex.id === id)?.name || 'Exercício desconhecido',
+                    device: isMobile ? 'mobile' : 'desktop',
+                    screenWidth: window.innerWidth
                 });
                 
-                console.log(`📊 Progresso salvo em Firebase: ${progressPath}`);
+                console.log(`📊 Progresso salvo em Firebase: ${progressPath} (${isMobile ? 'MOBILE' : 'DESKTOP'})`);
             }
         }
         
